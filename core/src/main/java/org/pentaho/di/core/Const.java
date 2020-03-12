@@ -747,6 +747,13 @@ public class Const {
   public static final String KETTLE_DO_NOT_NORMALIZE_NULL_STRING_TO_EMPTY = "KETTLE_DO_NOT_NORMALIZE_NULL_STRING_TO_EMPTY";
 
   /**
+   * This flag will prevent Kettle from converting a string containing only whitespace to the empty value by default in
+   * {@link org.pentaho.di.core.row.value.ValueMetaBase}.
+   * The default value is {@code true} (legacy default behavior).
+   */
+  public static final String KETTLE_NORMALIZE_WHITESPACE_STRINGS_TO_EMPTY = "KETTLE_NORMALIZE_WHITESPACE_STRINGS_TO_EMPTY";
+
+  /**
    * This flag will prevent Kettle from yielding {@code null} as the value of an empty XML tag in {@link org.pentaho.di.core.xml.XMLHandler}
    * The default value is {@code false} and an empty XML tag will produce a {@code null} value.
    */

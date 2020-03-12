@@ -4036,6 +4036,9 @@ public class ValueMetaBase implements ValueMetaInterface {
     Boolean normalizeNullStringToEmpty = !convertStringToBoolean(
       Const.NVL( System.getProperty( Const.KETTLE_DO_NOT_NORMALIZE_NULL_STRING_TO_EMPTY, "N" ), "N" ) );
 
+    boolean normalizeWhitespaceStringToEmpty = convertStringToBoolean(
+      Const.NVL( System.getProperty( Const.KETTLE_NORMALIZE_WHITESPACE_STRINGS_TO_EMPTY, "Y" ), "Y" ) );
+
     if ( normalizeNullStringToEmpty ) {
       if ( pol == null && isStringValue && isEmptyAndNullDiffer ) {
         pol = Const.NULL_STRING;
@@ -4062,7 +4065,7 @@ public class ValueMetaBase implements ValueMetaInterface {
         // Verify if there are only spaces in the polled value...
         // We consider that empty as well...
         //
-        if ( Const.onlySpaces( pol ) ) {
+        if ( normalizeWhitespaceStringToEmpty && Const.onlySpaces( pol ) ) {
           return emptyValue;
         }
       }
