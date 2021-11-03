@@ -689,4 +689,14 @@ public class LoggingRegistry {
   int getTimerHashCode( ) {
     return purgeTimer.hashCode();
   }
+
+  @VisibleForTesting
+  void setFileWriterBuffers( Map<String, LogChannelFileWriterBuffer> buffers ) {
+    fileWriterBuffers = buffers;
+  }
+
+  @VisibleForTesting
+  void setChildrenMap( Map<String, List<String>> map ) {
+    childrenMap = map;
+  }
 }

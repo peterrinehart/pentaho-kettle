@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.pentaho.di.core.encryption.TwoWayPasswordEncoderPluginType;
 import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.vfs.KettleVFS;
-import org.powermock.reflect.Whitebox;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -81,13 +80,13 @@ public class BasePluginTypeTest {
   @Test
   public void findAnnotatedClassFilesFailTest() throws Exception {
     LogChannel generalLog = mock( LogChannel.class );
-    Whitebox.setInternalState( LogChannel.class, "GENERAL", generalLog );
 
     FileObject fileObj1 = KettleVFS.getFileObject( BASE_RAM_DIR + "testJar1.jar" );
     FileObject fileObj2 = KettleVFS.getFileObject( BASE_RAM_DIR + "testJar2.jar" );
     FileObject[] fileObjects = { fileObj1, fileObj2 };
 
     BasePluginType bpt = spy( DatabasePluginType.getInstance() );
+    bpt.log = generalLog;
     List<PluginFolderInterface> pluginFolders = new ArrayList<>();
     PluginFolder pluginFolder =
       spy( new PluginFolder( BASE_RAM_DIR, false, true, false ) );
