@@ -107,12 +107,13 @@ public class LogChannelTest {
     when( logMsgInterfaceFil.getLevel() ).thenReturn( LogLevel.BASIC );
     when( logMsgInterfaceFil.toString() ).thenReturn( "a" );
 
-    MockedStatic<Utils> utilsMockedStatic = Mockito.mockStatic( Utils.class );
-    utilsMockedStatic.when( () -> Utils.isEmpty( anyString() ) ).thenReturn( false );
+    try ( MockedStatic<Utils> utilsMockedStatic = Mockito.mockStatic( Utils.class ) ) {
+      utilsMockedStatic.when( () -> Utils.isEmpty( anyString() ) ).thenReturn( false );
 
-    logChannel.setFilter( "b" );
-    logChannel.println( logMsgInterfaceFil, LogLevel.BASIC );
-    verify( logChFileWriterBuffer, times( 0 ) ).addEvent( any( KettleLoggingEvent.class ) );
+      logChannel.setFilter( "b" );
+      logChannel.println( logMsgInterfaceFil, LogLevel.BASIC );
+      verify( logChFileWriterBuffer, times( 0 ) ).addEvent( any( KettleLoggingEvent.class ) );
+    }
   }
 
   @Test
