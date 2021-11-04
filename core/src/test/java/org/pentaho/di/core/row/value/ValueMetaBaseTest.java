@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.mockito.Spy;
+import org.mockito.Mock;
 import org.owasp.encoder.Encode;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.BaseDatabaseMeta;
@@ -115,11 +115,10 @@ public class ValueMetaBaseTest {
   private Class<?> PKG = ValueMetaBase.PKG;
   private StoreLoggingEventListener listener;
 
-  @Spy
-  private DatabaseMeta databaseMetaSpy = spy( new DatabaseMeta() );
+  private DatabaseMeta databaseMetaMock = mock( DatabaseMeta.class );
   private PreparedStatement preparedStatementMock = mock( PreparedStatement.class );
   private ResultSet resultSet;
-  private DatabaseMeta dbMeta;
+  private DatabaseMeta dbMetaMock;
   private ValueMetaBase valueMetaBase;
 
   @BeforeClass
@@ -136,7 +135,7 @@ public class ValueMetaBaseTest {
     KettleLogStore.getAppender().addLoggingEventListener( listener );
 
     valueMetaBase = new ValueMetaBase( );
-    dbMeta = spy( new DatabaseMeta() );
+    dbMetaMock = mock( DatabaseMeta.class );
     resultSet = mock( ResultSet.class );
   }
 
@@ -1009,14 +1008,14 @@ public class ValueMetaBaseTest {
     List<KettleLoggingEvent> events = listener.getEvents();
     assertEquals( 0, events.size() );
 
-    databaseMetaSpy.setDatabaseInterface( new PostgreSQLDatabaseMeta() );
-    doReturn( 1024 ).when( databaseMetaSpy ).getMaxTextFieldLength();
-    doReturn( false ).when( databaseMetaSpy ).supportsSetCharacterStream();
+    databaseMetaMock.setDatabaseInterface( new PostgreSQLDatabaseMeta() );
+    doReturn( 1024 ).when( databaseMetaMock ).getMaxTextFieldLength();
+    doReturn( false ).when( databaseMetaMock ).supportsSetCharacterStream();
 
     String data = StringUtils.repeat( "*", 2048 );
 
     ValueMetaBase valueMetaString = new ValueMetaBase( LOG_FIELD, ValueMetaInterface.TYPE_STRING, 2048, 0 );
-    valueMetaString.setPreparedStatementValue( databaseMetaSpy, preparedStatementMock, 0, data );
+    valueMetaString.setPreparedStatementValue( databaseMetaMock, preparedStatementMock, 0, data );
 
     verify( preparedStatementMock, never() ).setString( 0, data );
     verify( preparedStatementMock, times( 1 ) ).setString( anyInt(), anyString() );
@@ -1037,8 +1036,8 @@ public class ValueMetaBaseTest {
 
   private void initValueMeta( BaseDatabaseMeta dbMeta, int length, Object data ) throws KettleDatabaseException {
     ValueMetaBase valueMetaString = new ValueMetaBase( LOG_FIELD, ValueMetaInterface.TYPE_STRING, length, 0 );
-    databaseMetaSpy.setDatabaseInterface( dbMeta );
-    valueMetaString.setPreparedStatementValue( databaseMetaSpy, preparedStatementMock, 0, data );
+    databaseMetaMock.setDatabaseInterface( dbMeta );
+    valueMetaString.setPreparedStatementValue( databaseMetaMock, preparedStatementMock, 0, data );
   }
 
   @Test
@@ -1141,35 +1140,35 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlCharToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.CHAR ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
   @Test
   public void testMetdataPreviewSqlVarcharToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.VARCHAR ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
   @Test
   public void testMetdataPreviewSqlNVarcharToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.NVARCHAR ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
   @Test
   public void testMetdataPreviewSqlLongVarcharToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.LONGVARCHAR ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
   @Test
   public void testMetdataPreviewSqlClobToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.CLOB ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
     assertEquals( DatabaseMeta.CLOB_LENGTH, valueMeta.getLength() );
     assertTrue( valueMeta.isLargeTextField() );
@@ -1178,7 +1177,7 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlNClobToPentahoString() throws SQLException, KettleDatabaseException {
     doReturn( Types.NCLOB ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
     assertEquals( DatabaseMeta.CLOB_LENGTH, valueMeta.getLength() );
     assertTrue( valueMeta.isLargeTextField() );
@@ -1187,7 +1186,7 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlBigIntToPentahoInteger() throws SQLException, KettleDatabaseException {
     doReturn( Types.BIGINT ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 15, valueMeta.getLength() );
@@ -1196,7 +1195,7 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlIntegerToPentahoInteger() throws SQLException, KettleDatabaseException {
     doReturn( Types.INTEGER ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 9, valueMeta.getLength() );
@@ -1205,7 +1204,7 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlSmallIntToPentahoInteger() throws SQLException, KettleDatabaseException {
     doReturn( Types.SMALLINT ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 4, valueMeta.getLength() );
@@ -1214,7 +1213,7 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlTinyIntToPentahoInteger() throws SQLException, KettleDatabaseException {
     doReturn( Types.TINYINT ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 2, valueMeta.getLength() );
@@ -1226,7 +1225,7 @@ public class ValueMetaBaseTest {
     doReturn( 20 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 5 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( 5, valueMeta.getPrecision() );
     assertEquals( 20, valueMeta.getLength() );
@@ -1235,7 +1234,7 @@ public class ValueMetaBaseTest {
     doReturn( 20 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 20, valueMeta.getLength() );
@@ -1247,7 +1246,7 @@ public class ValueMetaBaseTest {
     doReturn( 2 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 2, valueMeta.getLength() );
@@ -1259,7 +1258,7 @@ public class ValueMetaBaseTest {
     doReturn( 3 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 2 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( 2, valueMeta.getPrecision() );
     assertEquals( 3, valueMeta.getLength() );
@@ -1271,7 +1270,7 @@ public class ValueMetaBaseTest {
     doReturn( 3 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( 3, valueMeta.getLength() );
@@ -1283,7 +1282,7 @@ public class ValueMetaBaseTest {
     doReturn( 128 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 127 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( -1, valueMeta.getLength() );
@@ -1295,8 +1294,8 @@ public class ValueMetaBaseTest {
     doReturn( 20 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 18 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( -1, valueMeta.getLength() );
@@ -1308,9 +1307,9 @@ public class ValueMetaBaseTest {
     doReturn( 4 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 5 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    doReturn( true ).when( dbMeta ).isMySQLVariant( );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    doReturn( true ).when( dbMetaMock ).isMySQLVariant( );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( -1, valueMeta.getLength() );
@@ -1322,7 +1321,7 @@ public class ValueMetaBaseTest {
     doReturn( 20 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 15 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( 15, valueMeta.getPrecision() );
     assertEquals( 20, valueMeta.getLength() );
@@ -1334,7 +1333,7 @@ public class ValueMetaBaseTest {
     doReturn( 3 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 2 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( 2, valueMeta.getPrecision() );
     assertEquals( 3, valueMeta.getLength() );
@@ -1346,7 +1345,7 @@ public class ValueMetaBaseTest {
     doReturn( 3 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 2 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( 2, valueMeta.getPrecision() );
     assertEquals( 3, valueMeta.getLength() );
@@ -1358,8 +1357,8 @@ public class ValueMetaBaseTest {
     doReturn( 0 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( -1, valueMeta.getLength() );
@@ -1371,8 +1370,8 @@ public class ValueMetaBaseTest {
     doReturn( 0 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( GreenplumDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( GreenplumDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( -1, valueMeta.getLength() );
@@ -1384,9 +1383,9 @@ public class ValueMetaBaseTest {
     doReturn( 38 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    when( ( (OracleDatabaseMeta) dbMeta.getDatabaseInterface() ).strictBigNumberInterpretation() ).thenReturn( true );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    when( ( (OracleDatabaseMeta) dbMetaMock.getDatabaseInterface() ).strictBigNumberInterpretation() ).thenReturn( true );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
   }
 
@@ -1396,9 +1395,9 @@ public class ValueMetaBaseTest {
     doReturn( 38 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 0 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    when( ( (OracleDatabaseMeta) dbMeta.getDatabaseInterface() ).strictBigNumberInterpretation() ).thenReturn( false );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    when( ( (OracleDatabaseMeta) dbMetaMock.getDatabaseInterface() ).strictBigNumberInterpretation() ).thenReturn( false );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
   }
 
@@ -1407,9 +1406,9 @@ public class ValueMetaBaseTest {
     doReturn( Types.TIMESTAMP ).when( resultSet ).getInt( "DATA_TYPE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 19 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    doReturn( true ).when( dbMeta ).supportsTimestampDataType();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    doReturn( true ).when( dbMetaMock ).supportsTimestampDataType();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isDate() );
     assertEquals( -1, valueMeta.getPrecision() );
     assertEquals( 19, valueMeta.getLength() );
@@ -1420,16 +1419,16 @@ public class ValueMetaBaseTest {
     doReturn( Types.TIMESTAMP ).when( resultSet ).getInt( "DATA_TYPE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 19 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
-    doReturn( false ).when( dbMeta ).supportsTimestampDataType();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( false ).when( dbMetaMock ).supportsTimestampDataType();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( !valueMeta.isDate() );
   }
 
   @Test
   public void testMetdataPreviewSqlDateToPentahoDateUsingTeradata() throws SQLException, KettleDatabaseException {
     doReturn( Types.DATE ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( TeradataDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( TeradataDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isDate() );
     assertEquals( 1, valueMeta.getPrecision() );
   }
@@ -1437,19 +1436,19 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlTimeToPentahoDate() throws SQLException, KettleDatabaseException {
     doReturn( Types.TIME ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isDate() );
   }
 
   @Test
   public void testMetdataPreviewSqlTimeToPentahoIntegerUsingMySQLVariant() throws SQLException, KettleDatabaseException {
     doReturn( Types.TIME ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    doReturn( true ).when( dbMeta ).isMySQLVariant( );
-    doReturn( mock( Properties.class ) ).when( dbMeta ).getConnectionProperties();
-    when( dbMeta.getConnectionProperties().getProperty( "yearIsDateType" ) ).thenReturn( "false" );
+    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    doReturn( true ).when( dbMetaMock ).isMySQLVariant( );
+    doReturn( mock( Properties.class ) ).when( dbMetaMock ).getConnectionProperties();
+    when( dbMetaMock.getConnectionProperties().getProperty( "yearIsDateType" ) ).thenReturn( "false" );
     doReturn( "YEAR" ).when( resultSet ).getString( "TYPE_NAME" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isInteger() );
     assertEquals( 0, valueMeta.getPrecision() );
     assertEquals( 4, valueMeta.getLength() );
@@ -1458,38 +1457,38 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlBooleanToPentahoBoolean() throws SQLException, KettleDatabaseException {
     doReturn( Types.BOOLEAN ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBoolean() );
   }
 
   @Test
   public void testMetdataPreviewSqlBitToPentahoBoolean() throws SQLException, KettleDatabaseException {
     doReturn( Types.BIT ).when( resultSet ).getInt( "DATA_TYPE" );
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBoolean() );
   }
 
   @Test
   public void testMetdataPreviewSqlBinaryToPentahoBinary() throws SQLException, KettleDatabaseException {
     doReturn( Types.BINARY ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBinary() );
   }
 
   @Test
   public void testMetdataPreviewSqlBinaryToPentahoStringUsingSQLite() throws SQLException, KettleDatabaseException {
     doReturn( Types.BINARY ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( SQLiteDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( SQLiteDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
   @Test
   public void testMetdataPreviewSqlBlobToPentahoBinary() throws SQLException, KettleDatabaseException {
     doReturn( Types.BLOB ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBinary() );
     assertTrue( valueMeta.isBinary() );
   }
@@ -1497,8 +1496,8 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlVarBinaryToPentahoBinary() throws SQLException, KettleDatabaseException {
     doReturn( Types.VARBINARY ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBinary() );
   }
 
@@ -1506,8 +1505,8 @@ public class ValueMetaBaseTest {
   public void testMetdataPreviewSqlVarBinaryToPentahoStringUsingOracle() throws SQLException, KettleDatabaseException {
     doReturn( Types.VARBINARY ).when( resultSet ).getInt( "DATA_TYPE" );
     doReturn( 16 ).when( resultSet ).getInt( "COLUMN_SIZE" );
-    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
     assertEquals( 16, valueMeta.getLength() );
   }
@@ -1516,9 +1515,9 @@ public class ValueMetaBaseTest {
   public void testMetdataPreviewSqlVarBinaryToPentahoBinaryUsingMySQLVariant() throws SQLException, KettleDatabaseException {
     doReturn( Types.VARBINARY ).when( resultSet ).getInt( "DATA_TYPE" );
     doReturn( 16 ).when( resultSet ).getInt( "COLUMN_SIZE" );
-    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    doReturn( true ).when( dbMeta ).isMySQLVariant();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    doReturn( true ).when( dbMetaMock ).isMySQLVariant();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBinary() );
     assertEquals( -1, valueMeta.getLength() );
   }
@@ -1526,16 +1525,16 @@ public class ValueMetaBaseTest {
   @Test
   public void testMetdataPreviewSqlLongVarBinaryToPentahoBinary() throws SQLException, KettleDatabaseException {
     doReturn( Types.LONGVARBINARY ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( PostgreSQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBinary() );
   }
 
   @Test
   public void testMetdataPreviewSqlLongVarBinaryToPentahoStringUsingOracle() throws SQLException, KettleDatabaseException {
     doReturn( Types.LONGVARBINARY ).when( resultSet ).getInt( "DATA_TYPE" );
-    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isString() );
   }
 
@@ -1543,9 +1542,9 @@ public class ValueMetaBaseTest {
   public void testMetdataPreviewSqlDoubleToPentahoNumberUsingMySQL() throws SQLException, KettleDatabaseException {
     doReturn( Types.DOUBLE ).when( resultSet ).getInt( "DATA_TYPE" );
     doReturn( 22 ).when( resultSet ).getInt( "COLUMN_SIZE" );
-    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMeta ).getDatabaseInterface();
-    doReturn( true ).when( dbMeta ).isMySQLVariant();
-    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMeta, resultSet );
+    doReturn( mock( MySQLDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
+    doReturn( true ).when( dbMetaMock ).isMySQLVariant();
+    ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isNumber() );
     assertEquals( -1, valueMeta.getLength() );
   }
