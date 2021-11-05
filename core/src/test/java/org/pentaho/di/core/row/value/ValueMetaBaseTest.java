@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -29,7 +29,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.owasp.encoder.Encode;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.BaseDatabaseMeta;
@@ -51,6 +50,7 @@ import org.pentaho.di.core.logging.KettleLoggingEvent;
 import org.pentaho.di.core.logging.KettleLoggingEventListener;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LoggingObject;
+import org.pentaho.di.core.logging.LoggingObjectInterface;
 import org.pentaho.di.core.logging.LoggingRegistry;
 import org.pentaho.di.core.plugins.DatabasePluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
@@ -86,12 +86,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -115,8 +115,8 @@ public class ValueMetaBaseTest {
   private Class<?> PKG = ValueMetaBase.PKG;
   private StoreLoggingEventListener listener;
 
-  private DatabaseMeta databaseMetaMock = mock( DatabaseMeta.class );
-  private PreparedStatement preparedStatementMock = mock( PreparedStatement.class );
+  private DatabaseMeta databaseMetaMock;
+  private PreparedStatement preparedStatementMock;
   private ResultSet resultSet;
   private DatabaseMeta dbMetaMock;
   private ValueMetaBase valueMetaBase;
@@ -126,16 +126,18 @@ public class ValueMetaBaseTest {
     PluginRegistry.addPluginType( ValueMetaPluginType.getInstance() );
     PluginRegistry.addPluginType( DatabasePluginType.getInstance() );
     PluginRegistry.init();
-    KettleLogStore.init();
   }
 
   @Before
   public void setUp() {
+    KettleLogStore.init();
     listener = new StoreLoggingEventListener();
     KettleLogStore.getAppender().addLoggingEventListener( listener );
 
     valueMetaBase = new ValueMetaBase( );
     dbMetaMock = mock( DatabaseMeta.class );
+    databaseMetaMock = mock( DatabaseMeta.class );
+    preparedStatementMock = mock( PreparedStatement.class );
     resultSet = mock( ResultSet.class );
   }
 
@@ -271,9 +273,10 @@ public class ValueMetaBaseTest {
     final int expectedVarBinarylength = 80;
 
     ValueMetaBase obj = new ValueMetaBase();
-    DatabaseMeta dbMeta = spy( new DatabaseMeta() );
+    DatabaseMeta dbMeta = mock( DatabaseMeta.class );
     DatabaseInterface databaseInterface = new Vertica5DatabaseMeta();
-    dbMeta.setDatabaseInterface( databaseInterface );
+    when( dbMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( dbMeta.isDisplaySizeTwiceThePrecision() ).thenReturn( true );
 
     ResultSetMetaData metaData = mock( ResultSetMetaData.class );
 
@@ -737,9 +740,13 @@ public class ValueMetaBaseTest {
     assertTrue( Modifier.isFinal( log.getModifiers() ) );
     log.setAccessible( true );
     try {
-      assertEquals( LoggingRegistry.getInstance().findExistingLoggingSource( new LoggingObject( "ValueMetaBase" ) )
-          .getLogChannelId(),
-        ( (LogChannelInterface) log.get( null ) ).getLogChannelId() );
+      LoggingObjectInterface loggingObjectInterface =
+        LoggingRegistry.getInstance().findExistingLoggingSource( new LoggingObject( "ValueMetaBase" ) );
+      // if other tests are being run, the LoggingRegistry may have been reset since ValueMetaBase was initialized
+      if ( null != loggingObjectInterface ) {
+        assertEquals( loggingObjectInterface.getLogChannelId(),
+          ( (LogChannelInterface) log.get( null ) ).getLogChannelId() );
+      }
     } finally {
       log.setAccessible( false );
     }
@@ -900,9 +907,9 @@ public class ValueMetaBaseTest {
 
     final int binaryColumnIndex = 1;
     ValueMetaBase valueMetaBase = new ValueMetaBase();
-    DatabaseMeta dbMeta = spy( new DatabaseMeta() );
+    DatabaseMeta dbMeta = mock( DatabaseMeta.class );
     DatabaseInterface databaseInterface = new MySQLDatabaseMeta();
-    dbMeta.setDatabaseInterface( databaseInterface );
+    when( dbMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
 
     ResultSetMetaData metaData = mock( ResultSetMetaData.class );
 
@@ -983,6 +990,7 @@ public class ValueMetaBaseTest {
   @Test
   public void test_PDI_17126_Postgres() throws Exception {
     String data = StringUtils.repeat( "*", 10 );
+    doReturn( 1024 ).when( databaseMetaMock ).getMaxTextFieldLength();
     initValueMeta( new PostgreSQLDatabaseMeta(), 20, data );
 
     verify( preparedStatementMock, times( 1 ) ).setString( 0, data );
@@ -994,6 +1002,7 @@ public class ValueMetaBaseTest {
   @Test
   public void test_Pdi_17126_postgres_DataLongerThanMetaLength() throws Exception {
     String data = StringUtils.repeat( "*", 20 );
+    doReturn( 1024 ).when( databaseMetaMock ).getMaxTextFieldLength();
     initValueMeta( new PostgreSQLDatabaseMeta(), 10, data );
 
     verify( preparedStatementMock, times( 1 ) ).setString( 0, data );
@@ -1022,8 +1031,7 @@ public class ValueMetaBaseTest {
 
     // check that truncated string was logged
     assertEquals( 1, events.size() );
-    assertEquals( "ValueMetaBase - Truncating 1024 symbols of original message in 'LOG_FIELD' field",
-      events.get( 0 ).getMessage().toString() );
+    assertTrue( events.get( 0 ).getMessage().toString().contains( "Truncating 1024 symbols of original message in 'LOG_FIELD' field" ) );
   }
 
   @Test
@@ -1282,6 +1290,7 @@ public class ValueMetaBaseTest {
     doReturn( 128 ).when( resultSet ).getInt( "COLUMN_SIZE" );
     doReturn( mock( Object.class ) ).when( resultSet ).getObject( "DECIMAL_DIGITS" );
     doReturn( 127 ).when( resultSet ).getInt( "DECIMAL_DIGITS" );
+    doReturn( mock( OracleDatabaseMeta.class ) ).when( dbMetaMock ).getDatabaseInterface();
     ValueMetaInterface valueMeta = valueMetaBase.getMetadataPreview( dbMetaMock, resultSet );
     assertTrue( valueMeta.isBigNumber() );
     assertEquals( -1, valueMeta.getPrecision() );

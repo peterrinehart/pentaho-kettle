@@ -187,10 +187,11 @@ public class GenericDatabaseMetaTest {
   public void testSettingDialect() {
     String dialect = "testDialect";
     DatabaseInterface[] dbInterfaces = new DatabaseInterface[] { mockedMeta };
-    MockedStatic<DatabaseMeta> dbMeta = Mockito.mockStatic( DatabaseMeta.class );
-    dbMeta.when( () -> DatabaseMeta.getDatabaseInterfaces() ).thenReturn( dbInterfaces );
-    Mockito.when( mockedMeta.getPluginName() ).thenReturn( dialect );
-    nativeMeta.addAttribute( "DATABASE_DIALECT_ID", dialect );
-    assertEquals( mockedMeta, nativeMeta.getDatabaseDialectInternal() );
+    try ( MockedStatic<DatabaseMeta> dbMeta = Mockito.mockStatic( DatabaseMeta.class ) ) {
+      dbMeta.when( () -> DatabaseMeta.getDatabaseInterfaces() ).thenReturn( dbInterfaces );
+      Mockito.when( mockedMeta.getPluginName() ).thenReturn( dialect );
+      nativeMeta.addAttribute( "DATABASE_DIALECT_ID", dialect );
+      assertEquals( mockedMeta, nativeMeta.getDatabaseDialectInternal() );
+    }
   }
 }
