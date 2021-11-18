@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -26,7 +26,9 @@ package org.pentaho.di.trans.streaming.common;
 import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.Flowable;
 import io.reactivex.processors.PublishProcessor;
+import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.LogChannel;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.trans.streaming.api.StreamSource;
 
@@ -59,10 +61,11 @@ public abstract class BlockingQueueStreamSource<T> implements StreamSource<T> {
 
   // binary semaphore used to block acceptance of rows when paused
   @VisibleForTesting Semaphore acceptingRowsSemaphore = new Semaphore( 1 );
-  @VisibleForTesting LogChannel logChannel = new LogChannel( this );
+  @VisibleForTesting LogChannelInterface logChannel;
 
   protected BlockingQueueStreamSource( BaseStreamStep streamStep ) {
     this.streamStep = streamStep;
+    logChannel = KettleLogStore.getLogChannelInterfaceFactory().create( this, streamStep );
   }
 
 

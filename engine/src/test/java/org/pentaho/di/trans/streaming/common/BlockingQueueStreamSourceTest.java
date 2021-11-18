@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.core.logging.LogChannel;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.trans.SubtransExecutor;
 
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doThrow;
@@ -57,7 +60,7 @@ public class BlockingQueueStreamSourceTest {
   private ExecutorService execSvc = Executors.newCachedThreadPool();
   @Mock private BaseStreamStep streamStep;
   @Mock private Semaphore semaphore;
-  @Mock private LogChannel logChannel;
+  @Mock private LogChannelInterface logChannel;
   @Mock private SubtransExecutor subtransExecutor;
 
   private BlockingQueueStreamSource<String> streamSource;
@@ -75,6 +78,7 @@ public class BlockingQueueStreamSourceTest {
   public void errorLoggedIfInterruptedInAcceptRows() throws InterruptedException {
     streamSource.acceptingRowsSemaphore = semaphore;
     streamSource.logChannel = logChannel;
+    doNothing().when( logChannel ).logDebug( anyString() );
     doThrow( new InterruptedException( "interrupt" ) )
       .when( semaphore ).acquire();
     streamSource.acceptRows( singletonList( "new row" ) );
@@ -96,6 +100,8 @@ public class BlockingQueueStreamSourceTest {
 
   @Test
   public void rowIterableBlocksTillRowReceived() {
+    streamSource.logChannel = logChannel;
+    doNothing().when( logChannel ).logDebug( anyString() );
     streamSource.open();
     Iterator<String> iterator = streamSource.flowable().blockingIterable().iterator();
 
@@ -115,6 +121,8 @@ public class BlockingQueueStreamSourceTest {
 
   @Test
   public void streamIsPausable() {
+    streamSource.logChannel = logChannel;
+    doNothing().when( logChannel ).logDebug( anyString() );
     streamSource.open();
 
     Iterator<String> iter = streamSource.flowable().blockingIterable().iterator();
@@ -160,6 +168,8 @@ public class BlockingQueueStreamSourceTest {
         } );
       }
     };
+    streamSource.logChannel = logChannel;
+    doNothing().when( logChannel ).logDebug( anyString() );
     streamSource.open();
     Iterator<String> iterator = streamSource.flowable().blockingIterable().iterator();
 
