@@ -24,7 +24,6 @@
 
 package org.pentaho.di.engine.configuration.impl.spark;
 
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.pentaho.capabilities.api.ICapability;
 import org.pentaho.capabilities.api.ICapabilityManager;
 import org.pentaho.capabilities.impl.DefaultCapabilityManager;
@@ -46,11 +45,14 @@ public class SparkRunConfigurationExecutor implements RunConfigurationExecutor {
   public static String DEFAULT_SCHEMA = "http";
   public static String DEFAULT_URL = "127.0.0.1:53000";
 
-  private ConfigurationAdmin configurationAdmin;
   private ICapabilityManager capabilityManager = DefaultCapabilityManager.getInstance();
+  private static SparkRunConfigurationExecutor instance;
 
-  public SparkRunConfigurationExecutor( ConfigurationAdmin configurationAdmin ) {
-    this.configurationAdmin = configurationAdmin;
+  public static SparkRunConfigurationExecutor getInstance() {
+    if ( null == instance ) {
+      instance = new SparkRunConfigurationExecutor();
+    }
+    return instance;
   }
 
   /**

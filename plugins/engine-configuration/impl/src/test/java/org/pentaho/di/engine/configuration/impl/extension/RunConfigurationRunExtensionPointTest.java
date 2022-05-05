@@ -61,7 +61,8 @@ public class RunConfigurationRunExtensionPointTest {
 
   @Before
   public void setup() {
-    runConfigurationRunExtensionPoint = new RunConfigurationRunExtensionPoint( runConfigurationManager );
+    runConfigurationRunExtensionPoint = new RunConfigurationRunExtensionPoint();
+    runConfigurationRunExtensionPoint.setRunConfigurationManager( runConfigurationManager );
 
     when( abstractMeta.getEmbeddedMetaStore() ).thenReturn( embeddedMetaStore );
     when( transExecutionConfiguration.getRunConfiguration() ).thenReturn( "RUN_CONF" );

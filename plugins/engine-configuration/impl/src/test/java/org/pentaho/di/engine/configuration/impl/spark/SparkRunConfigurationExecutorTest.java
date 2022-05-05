@@ -65,11 +65,10 @@ public class SparkRunConfigurationExecutorTest {
   @Before
   public void setup() throws Exception {
     Configuration configuration = mock( Configuration.class );
-    ConfigurationAdmin configurationAdmin = mock( ConfigurationAdmin.class );
 
     doReturn( properties ).when( configuration ).getProperties();
 
-    sparkRunConfigurationExecutor = new SparkRunConfigurationExecutor( configurationAdmin );
+    sparkRunConfigurationExecutor = new SparkRunConfigurationExecutor();
     capabilityProvider = mock( ICapabilityProvider.class );
 
     capabilityManager = DefaultCapabilityManager.getInstance();

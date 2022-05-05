@@ -83,7 +83,8 @@ public class RunConfigurationInjectExtensionPointTest {
 
   @Before
   public void setup() {
-    runConfigurationInjectExtensionPoint = new RunConfigurationInjectExtensionPoint( runConfigurationManager );
+    runConfigurationInjectExtensionPoint = new RunConfigurationInjectExtensionPoint();
+    runConfigurationInjectExtensionPoint.setRunConfigurationManager( runConfigurationManager );
     executionExt = new JobExecutionExtension( job, result, jobEntryCopy, false );
 
     when( abstractMeta.getEmbeddedMetaStore() ).thenReturn( embeddedMetaStore );

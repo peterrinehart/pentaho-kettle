@@ -41,11 +41,7 @@ import java.util.List;
         description = "" )
 public class RunConfigurationIsPentahoExtensionPoint implements ExtensionPointInterface {
 
-  private RunConfigurationManager runConfigurationManager;
-
-  public RunConfigurationIsPentahoExtensionPoint( RunConfigurationManager runConfigurationManager ) {
-    this.runConfigurationManager = runConfigurationManager;
-  }
+  private RunConfigurationManager runConfigurationManager = RunConfigurationManager.getInstance();
 
   @SuppressWarnings( "unchecked" )
   @Override

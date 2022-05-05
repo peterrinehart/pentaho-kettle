@@ -40,9 +40,9 @@ import org.pentaho.osgi.metastore.locator.api.MetastoreLocator;
 public class EmbeddedRunConfigurationManager {
   public static RunConfigurationManager build( EmbeddedMetaStore embeddedMetaStore ) {
     DefaultRunConfigurationProvider defaultRunConfigurationProvider =
-      new DefaultRunConfigurationProvider( createMetastoreLocator( embeddedMetaStore ), null );
+      new DefaultRunConfigurationProvider( embeddedMetaStore );
     SparkRunConfigurationProvider sparkRunConfigurationProvider =
-      new SparkRunConfigurationProvider( createMetastoreLocator( embeddedMetaStore ), null );
+      new SparkRunConfigurationProvider( embeddedMetaStore );
 
     List<RunConfigurationProvider> runConfigurationProviders = new ArrayList<>();
     runConfigurationProviders.add( defaultRunConfigurationProvider );
@@ -51,30 +51,5 @@ public class EmbeddedRunConfigurationManager {
     return new RunConfigurationManager( runConfigurationProviders );
   }
 
-  private static MetastoreLocator createMetastoreLocator( IMetaStore embeddedMetaStore ) {
-    return new MetastoreLocator() {
-
-      @Override
-      public IMetaStore getMetastore( String providerKey ) {
-        return embeddedMetaStore;
-      }
-
-      @Override
-      public IMetaStore getMetastore() {
-        return embeddedMetaStore;
-      }
-
-      @Override public String setEmbeddedMetastore( IMetaStore metastore ) {
-        return null;
-      }
-
-      @Override public void disposeMetastoreProvider( String providerKey ) {
-
-      }
-      @Override public IMetaStore getExplicitMetastore( String providerKey ) {
-        return null;
-      }
-    };
-  }
 
 }

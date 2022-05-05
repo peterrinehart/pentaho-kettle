@@ -66,7 +66,8 @@ public class RunConfigurationImportExtensionPointTest {
 
   @Before
   public void setup() {
-    runConfigurationImportExtensionPoint = new RunConfigurationImportExtensionPoint( runConfigurationManager );
+    runConfigurationImportExtensionPoint = new RunConfigurationImportExtensionPoint();
+    runConfigurationImportExtensionPoint.setRunConfigurationManager( runConfigurationManager );
 
     when( abstractMeta.getEmbeddedMetaStore() ).thenReturn( embeddedMetaStore );
   }

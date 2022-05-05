@@ -24,6 +24,7 @@
 
 package org.pentaho.di.engine.configuration.impl.extension;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.core.attributes.metastore.EmbeddedMetaStore;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPoint;
@@ -45,11 +46,7 @@ import org.pentaho.di.job.entries.trans.JobEntryTrans;
   )
 public class RunConfigurationInjectExtensionPoint implements ExtensionPointInterface {
 
-  private RunConfigurationManager runConfigurationManager;
-
-  public RunConfigurationInjectExtensionPoint( RunConfigurationManager runConfigurationManager ) {
-    this.runConfigurationManager = runConfigurationManager;
-  }
+  private RunConfigurationManager runConfigurationManager = RunConfigurationManager.getInstance();
 
   @Override
   public void callExtensionPoint( LogChannelInterface log, Object object ) throws KettleException {
@@ -78,4 +75,8 @@ public class RunConfigurationInjectExtensionPoint implements ExtensionPointInter
     }
   }
 
+  @VisibleForTesting
+  void setRunConfigurationManager( RunConfigurationManager runConfigurationManager ) {
+    this.runConfigurationManager = runConfigurationManager;
+  }
 }

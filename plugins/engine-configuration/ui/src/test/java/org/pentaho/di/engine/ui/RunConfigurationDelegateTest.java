@@ -44,6 +44,7 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.engine.configuration.api.RunConfigurationService;
+import org.pentaho.di.engine.configuration.impl.RunConfigurationManager;
 import org.pentaho.di.engine.configuration.impl.pentaho.DefaultRunConfiguration;
 import org.pentaho.di.engine.configuration.impl.spark.SparkRunConfiguration;
 import org.pentaho.di.job.JobMeta;
@@ -83,13 +84,9 @@ public class RunConfigurationDelegateTest {
     PowerMockito.mockStatic( Spoon.class );
     when( Spoon.getInstance() ).thenReturn( spoon );
 
-    service = mock( RunConfigurationService.class );
-    delegate = spy( new RunConfigurationDelegate( service ) );
-  }
-
-  @Test
-  public void testNew() {
-    assertSame( service, Whitebox.getInternalState( delegate, "configurationManager" ) );
+    delegate = spy( new RunConfigurationDelegate() );
+    service = mock( RunConfigurationManager.class );
+    delegate.setRunConfigurationManager( service );
   }
 
   @Test

@@ -45,6 +45,14 @@ import org.pentaho.di.ui.spoon.Spoon;
 public class DefaultRunConfigurationExecutor implements RunConfigurationExecutor {
 
   private static Class<?> PKG = DefaultRunConfigurationExecutor.class;
+  private static DefaultRunConfigurationExecutor instance;
+
+  public static DefaultRunConfigurationExecutor getInstance() {
+    if ( null == instance ) {
+      instance = new DefaultRunConfigurationExecutor();
+    }
+    return instance;
+  }
 
   @Override
   public void execute( RunConfiguration runConfiguration, ExecutionConfiguration executionConfiguration,

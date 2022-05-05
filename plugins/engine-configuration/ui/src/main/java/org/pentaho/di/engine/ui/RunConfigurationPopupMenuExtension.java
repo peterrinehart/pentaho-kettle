@@ -36,6 +36,7 @@ import org.pentaho.di.core.extension.ExtensionPointInterface;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.engine.configuration.api.RunConfiguration;
 import org.pentaho.di.engine.configuration.api.RunConfigurationService;
+import org.pentaho.di.engine.configuration.impl.RunConfigurationManager;
 import org.pentaho.di.engine.configuration.impl.pentaho.DefaultRunConfigurationProvider;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.ui.core.ConstUI;
@@ -55,16 +56,10 @@ public class RunConfigurationPopupMenuExtension implements ExtensionPointInterfa
 
   private Supplier<Spoon> spoonSupplier = Spoon::getInstance;
   private String runConfiguration;
-  private RunConfigurationDelegate runConfigurationDelegate;
-  private RunConfigurationService runConfigurationManager;
+  private RunConfigurationDelegate runConfigurationDelegate = RunConfigurationDelegate.getInstance();
+  private RunConfigurationService runConfigurationManager = RunConfigurationManager.getInstance();
   private Menu rootMenu;
   private Menu itemMenu;
-
-  public RunConfigurationPopupMenuExtension( RunConfigurationDelegate runConfigurationDelegate,
-                                             RunConfigurationService runConfigurationManager ) {
-    this.runConfigurationDelegate = runConfigurationDelegate;
-    this.runConfigurationManager = runConfigurationManager;
-  }
 
   @Override public void callExtensionPoint( LogChannelInterface logChannelInterface, Object extension )
     throws KettleException {

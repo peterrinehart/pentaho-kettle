@@ -66,14 +66,12 @@ public class RunConfigurationManagerTest {
   public void setup() throws Exception {
 
     MemoryMetaStore memoryMetaStore = new MemoryMetaStore();
-    MetastoreLocator metastoreLocator = createMetastoreLocator( memoryMetaStore );
 
     DefaultRunConfigurationProvider defaultRunConfigurationProvider =
-      new DefaultRunConfigurationProvider( metastoreLocator, defaultRunConfigurationExecutor );
+      new DefaultRunConfigurationProvider( memoryMetaStore );
 
-    SparkRunConfigurationExecutor sparkRunConfigurationExecutor = new SparkRunConfigurationExecutor( null );
     SparkRunConfigurationProvider sparkRunConfigurationProvider =
-      new SparkRunConfigurationProvider( metastoreLocator, sparkRunConfigurationExecutor );
+      new SparkRunConfigurationProvider( memoryMetaStore );
 
     List<RunConfigurationProvider> runConfigurationProviders = new ArrayList<>();
     runConfigurationProviders.add( sparkRunConfigurationProvider );
@@ -177,14 +175,12 @@ public class RunConfigurationManagerTest {
   @Test
   public void testOrdering() {
     MemoryMetaStore memoryMetaStore = new MemoryMetaStore();
-    MetastoreLocator metastoreLocator = createMetastoreLocator( memoryMetaStore );
 
     DefaultRunConfigurationProvider defaultRunConfigurationProvider =
-      new DefaultRunConfigurationProvider( metastoreLocator, defaultRunConfigurationExecutor );
+      new DefaultRunConfigurationProvider( memoryMetaStore );
 
-    SparkRunConfigurationExecutor sparkRunConfigurationExecutor = new SparkRunConfigurationExecutor( null );
     SparkRunConfigurationProvider sparkRunConfigurationProvider =
-      new SparkRunConfigurationProvider( metastoreLocator, sparkRunConfigurationExecutor );
+      new SparkRunConfigurationProvider( memoryMetaStore );
 
     List<RunConfigurationProvider> runConfigurationProviders = new ArrayList<>();
     runConfigurationProviders.add( sparkRunConfigurationProvider );

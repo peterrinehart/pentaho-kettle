@@ -5,7 +5,7 @@
 
   <artifactId>pdi-engine-configuration-api</artifactId>
   <version>9.4.0.0-SNAPSHOT</version>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
 
   <parent>
     <groupId>org.pentaho.di.plugins</groupId>
@@ -36,19 +36,19 @@
     </dependency>
   </dependencies>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-          <instructions>
-            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.pentaho.di.engine.configuration.api</Export-Package>
-          </instructions>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+<!--  <build>-->
+<!--    <plugins>-->
+<!--      <plugin>-->
+<!--        <groupId>org.apache.felix</groupId>-->
+<!--        <artifactId>maven-bundle-plugin</artifactId>-->
+<!--        <extensions>true</extensions>-->
+<!--        <configuration>-->
+<!--          <instructions>-->
+<!--            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>-->
+<!--            <Export-Package>org.pentaho.di.engine.configuration.api</Export-Package>-->
+<!--          </instructions>-->
+<!--        </configuration>-->
+<!--      </plugin>-->
+<!--    </plugins>-->
+<!--  </build>-->
 </project>

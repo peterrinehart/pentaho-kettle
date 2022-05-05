@@ -24,12 +24,14 @@
 
 package org.pentaho.di.engine.ui;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.eclipse.swt.SWT;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.extension.ExtensionPointHandler;
 import org.pentaho.di.core.extension.KettleExtensionPoint;
 import org.pentaho.di.engine.configuration.api.RunConfiguration;
 import org.pentaho.di.engine.configuration.api.RunConfigurationService;
+import org.pentaho.di.engine.configuration.impl.RunConfigurationManager;
 import org.pentaho.di.engine.configuration.impl.pentaho.DefaultRunConfiguration;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobMeta;
@@ -48,10 +50,14 @@ public class RunConfigurationDelegate {
   private static Class<?> PKG = RunConfigurationDelegate.class;
   private Supplier<Spoon> spoonSupplier = Spoon::getInstance;
 
-  private RunConfigurationService configurationManager;
+  private RunConfigurationService configurationManager = RunConfigurationManager.getInstance();
+  private static RunConfigurationDelegate instance;
 
-  public RunConfigurationDelegate( RunConfigurationService configurationManager ) {
-    this.configurationManager = configurationManager;
+  public static RunConfigurationDelegate getInstance() {
+    if ( null == instance ) {
+      instance = new RunConfigurationDelegate();
+    }
+    return instance;
   }
 
   public void edit( RunConfiguration runConfiguration ) {
@@ -141,4 +147,8 @@ public class RunConfigurationDelegate {
     spoonSupplier.get().refreshTree( RunConfigurationFolderProvider.STRING_RUN_CONFIGURATIONS );
   }
 
+  @VisibleForTesting
+  void setRunConfigurationManager( RunConfigurationService runConfigurationManager ) {
+    this.configurationManager = runConfigurationManager;
+  }
 }

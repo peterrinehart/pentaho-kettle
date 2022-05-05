@@ -29,6 +29,7 @@ import org.pentaho.di.engine.configuration.api.RunConfigurationExecutor;
 import org.pentaho.di.engine.configuration.api.RunConfigurationProvider;
 import org.pentaho.di.engine.configuration.api.RunConfigurationService;
 import org.pentaho.di.engine.configuration.impl.pentaho.DefaultRunConfigurationProvider;
+import org.pentaho.di.engine.configuration.impl.spark.SparkRunConfigurationProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,10 +41,24 @@ import java.util.List;
 public class RunConfigurationManager implements RunConfigurationService {
 
   private RunConfigurationProvider defaultRunConfigurationProvider;
-  private List<RunConfigurationProvider> runConfigurationProviders;
+  private List<RunConfigurationProvider> runConfigurationProviders = new ArrayList<>();
+  private static RunConfigurationManager instance;
+
+  public static RunConfigurationManager getInstance() {
+    if ( null == instance ) {
+      instance = new RunConfigurationManager();
+    }
+    return instance;
+  }
 
   public RunConfigurationManager( List<RunConfigurationProvider> runConfigurationProviders ) {
     this.runConfigurationProviders = runConfigurationProviders;
+  }
+
+  private RunConfigurationManager() {
+    this.runConfigurationProviders.add( new DefaultRunConfigurationProvider() );
+    this.runConfigurationProviders.add( new SparkRunConfigurationProvider() );
+    this.defaultRunConfigurationProvider = new DefaultRunConfigurationProvider();
   }
 
   @Override public List<RunConfiguration> load() {

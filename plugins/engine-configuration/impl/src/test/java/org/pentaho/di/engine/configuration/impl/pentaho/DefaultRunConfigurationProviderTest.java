@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.pentaho.di.engine.configuration.api.RunConfiguration;
+import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.osgi.metastore.locator.api.MetastoreLocator;
 
 import static org.junit.Assert.assertEquals;
@@ -43,7 +44,7 @@ public class DefaultRunConfigurationProviderTest {
   private DefaultRunConfigurationProvider defaultRunConfigurationProvider;
 
   @Mock
-  private MetastoreLocator metastoreLocator;
+  private IMetaStore metastoreLocator;
 
   @Mock
   private DefaultRunConfigurationExecutor defaultRunConfigurationExecutor;
@@ -51,7 +52,7 @@ public class DefaultRunConfigurationProviderTest {
   @Before
   public void setup() {
     defaultRunConfigurationProvider =
-      new DefaultRunConfigurationProvider( metastoreLocator, defaultRunConfigurationExecutor );
+      new DefaultRunConfigurationProvider( metastoreLocator );
   }
 
   @Test

@@ -31,6 +31,7 @@ import org.pentaho.di.engine.configuration.api.RunConfigurationProvider;
 import org.pentaho.di.engine.configuration.impl.MetaStoreRunConfigurationFactory;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.pentaho.metastore.persist.MetaStoreFactory;
 import org.pentaho.osgi.metastore.locator.api.MetastoreLocator;
@@ -60,10 +61,13 @@ public class DefaultRunConfigurationProvider extends MetaStoreRunConfigurationFa
     defaultRunConfiguration.setLocal( true );
   }
 
-  public DefaultRunConfigurationProvider( MetastoreLocator metastoreLocator,
-                                          DefaultRunConfigurationExecutor defaultRunConfigurationExecutor ) {
-    super( metastoreLocator );
-    this.defaultRunConfigurationExecutor = defaultRunConfigurationExecutor;
+  public DefaultRunConfigurationProvider() {
+    this.defaultRunConfigurationExecutor = DefaultRunConfigurationExecutor.getInstance();
+  }
+
+  public DefaultRunConfigurationProvider( IMetaStore metaStore ) {
+    super( metaStore );
+    this.defaultRunConfigurationExecutor = DefaultRunConfigurationExecutor.getInstance();
   }
 
   @Override public RunConfiguration getConfiguration() {

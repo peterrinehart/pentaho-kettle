@@ -24,6 +24,7 @@
 
 package org.pentaho.di.engine.configuration.impl.extension;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.pentaho.di.ExecutionConfiguration;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.core.attributes.metastore.EmbeddedMetaStore;
@@ -49,11 +50,7 @@ public class RunConfigurationRunExtensionPoint implements ExtensionPointInterfac
 
   private static Class<?> PKG = RunConfigurationRunExtensionPoint.class;
 
-  private RunConfigurationManager runConfigurationManager;
-
-  public RunConfigurationRunExtensionPoint( RunConfigurationManager runConfigurationManager ) {
-    this.runConfigurationManager = runConfigurationManager;
-  }
+  private RunConfigurationManager runConfigurationManager = RunConfigurationManager.getInstance();
 
   @Override public void callExtensionPoint( LogChannelInterface logChannelInterface, Object o ) throws KettleException {
     ExecutionConfiguration executionConfiguration = (ExecutionConfiguration) ( (Object[]) o )[ 0 ];
@@ -87,5 +84,10 @@ public class RunConfigurationRunExtensionPoint implements ExtensionPointInterfac
         .getString( PKG, "RunConfigurationRunExtensionPoint.ConfigNotFound.Error", name,
           executionConfiguration.getRunConfiguration(), "{0}" ) );
     }
+  }
+
+  @VisibleForTesting
+  void setRunConfigurationManager( RunConfigurationManager runConfigurationManager ) {
+    this.runConfigurationManager = runConfigurationManager;
   }
 }

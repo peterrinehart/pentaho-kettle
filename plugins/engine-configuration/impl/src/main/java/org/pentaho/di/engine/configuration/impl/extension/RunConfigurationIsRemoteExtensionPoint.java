@@ -41,11 +41,7 @@ import java.util.List;
   description = "" )
 public class RunConfigurationIsRemoteExtensionPoint implements ExtensionPointInterface {
 
-  private RunConfigurationManager runConfigurationManager;
-
-  public RunConfigurationIsRemoteExtensionPoint( RunConfigurationManager runConfigurationManager ) {
-    this.runConfigurationManager = runConfigurationManager;
-  }
+  private RunConfigurationManager runConfigurationManager = RunConfigurationManager.getInstance();
 
   @SuppressWarnings( "unchecked" )
   @Override
