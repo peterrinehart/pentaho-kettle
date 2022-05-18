@@ -70,6 +70,7 @@ public class DELETE_ME_TEST {
 
                 Button b = new Button( parent, SWT.PUSH );
                 b.setText( "Open Dialog" );
+
                 b.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( org.eclipse.swt.events.SelectionEvent arg0 ) {
                         FileOpenSaveDialog fosd = new FileOpenSaveDialog( getShell(), 800, 540, null );

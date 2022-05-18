@@ -32,7 +32,6 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -67,19 +66,16 @@ import org.pentaho.di.core.SwtUniversalImage;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.plugins.fileopensave.api.file.FileDetails;
+import org.pentaho.di.plugins.fileopensave.api.providers.BaseEntity;
 import org.pentaho.di.plugins.fileopensave.api.providers.Directory;
 import org.pentaho.di.plugins.fileopensave.api.providers.File;
 import org.pentaho.di.plugins.fileopensave.api.providers.Tree;
-import org.pentaho.di.plugins.fileopensave.api.providers.Utils;
 import org.pentaho.di.plugins.fileopensave.api.providers.exception.FileException;
-import org.pentaho.di.plugins.fileopensave.cache.FileCache;
 import org.pentaho.di.plugins.fileopensave.controllers.FileController;
-import org.pentaho.di.plugins.fileopensave.providers.ProviderService;
-import org.pentaho.di.plugins.fileopensave.providers.local.LocalFileProvider;
 import org.pentaho.di.plugins.fileopensave.providers.local.model.LocalFile;
-import org.pentaho.di.plugins.fileopensave.providers.recents.RecentFileProvider;
 import org.pentaho.di.plugins.fileopensave.providers.recents.model.RecentTree;
-import org.pentaho.di.plugins.fileopensave.providers.vfs.VFSFileProvider;
+import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSFile;
+import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSLocation;
 import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSTree;
 import org.pentaho.di.plugins.fileopensave.service.FileCacheService;
 import org.pentaho.di.plugins.fileopensave.service.ProviderServiceService;
@@ -90,7 +86,6 @@ import org.pentaho.di.ui.core.events.dialog.ProviderFilterType;
 import org.pentaho.di.ui.util.HelpUtils;
 import org.pentaho.di.ui.util.SwtSvgImageUtil;
 
-import net.sf.saxon.om.FastStringBuffer;
 
 public class FileOpenSaveDialog extends Dialog implements FileDetails {
   private static final Class<?> PKG = FileOpenSaveDialog.class;
@@ -119,6 +114,7 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
   public static final String PARENT_PARAM = "parent";
   public static final String TYPE_PARAM = "type";
 
+  private String shellTitle = "Select File or Folder";
   private String objectId;
   private String name;
   private String path;
@@ -150,14 +146,24 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
     setShellStyle( OPTIONS );
   }
 
+
   public void open( FileDialogOperation fileDialogOperation ) {
+    String dialogPath = fileDialogOperation.getPath() != null
+            ? fileDialogOperation.getPath()
+            : fileDialogOperation.getStartDir();
+
+    StringBuilder clientPath = new StringBuilder();
+    String cmd = fileDialogOperation.getCommand();
+
+    shellTitle = StringUtils.isEmpty( cmd ) ? "" : BaseMessages.getString( PKG,
+            ( "FileOpenSaveDialog.dialog." + cmd + ".title" ) );
 
   }
 
   @Override
   protected void configureShell( Shell newShell ) {
     // newShell.setImage( LOGO );
-    newShell.setText( "Command Line" );
+    newShell.setText( shellTitle );
     PropsUI.getInstance().setLook( newShell );
     newShell.setMinimumSize( 545, 458 );
   }
@@ -207,8 +213,8 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
     Label lblSelect = new Label( headerComposite, SWT.LEFT );
     PropsUI.getInstance().setLook( lblSelect );
 
-    // TODO: Set text dynamically
-    lblSelect.setText( "Select a file or folder" );
+    lblSelect.setText(StringUtils.capitalize(shellTitle));
+
 
     FontData[] fontData = lblSelect.getFont().getFontData();
     Arrays.stream( fontData ).forEach( fd -> fd.height = 20 );
@@ -467,13 +473,22 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
       if( selection != null && selection instanceof Directory  ) {
         treeViewer.setExpandedState( selection, true );
         treeViewer.setSelection( new StructuredSelection( selection ), true );
+      } else if (selection != null && selection instanceof File) {
+        File f = (File) selection;
+
+//        objectId
+        path = f.getPath();
+        parentPath = f.getParent();
+        type = f.getType();
+//        connection;
+        provider = f.getProvider();
       }
     });
 
 
     fileTableViewer.addDoubleClickListener( ( e ) -> {
       LocalFile jjarvis = new LocalFile();
-      jjarvis.setPath( "/C:\\/Users/jjarvis" );
+      jjarvis.setPath( "/C:\\/Users/kurena" );
 
       treeViewer.expandToLevel( jjarvis, TreeViewer.ALL_LEVELS );
     });
