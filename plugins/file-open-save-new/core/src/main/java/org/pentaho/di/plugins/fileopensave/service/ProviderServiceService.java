@@ -33,7 +33,7 @@ public enum ProviderServiceService {
             }
         } );
 
-        providerService = new ProviderService( Arrays.asList( recentProvider, localProvider, repoProvider, vfsProvider ) );
+        this.providerService = new ProviderService( Arrays.asList( recentProvider, localProvider, repoProvider, vfsProvider ) );
 
     }
 

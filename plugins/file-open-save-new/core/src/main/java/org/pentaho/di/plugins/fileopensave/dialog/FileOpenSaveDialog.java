@@ -23,10 +23,12 @@
 package org.pentaho.di.plugins.fileopensave.dialog;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -45,6 +47,8 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -56,17 +60,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.SwtUniversalImage;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.plugins.fileopensave.api.file.FileDetails;
-import org.pentaho.di.plugins.fileopensave.api.providers.BaseEntity;
 import org.pentaho.di.plugins.fileopensave.api.providers.Directory;
 import org.pentaho.di.plugins.fileopensave.api.providers.File;
 import org.pentaho.di.plugins.fileopensave.api.providers.Tree;
@@ -74,8 +73,6 @@ import org.pentaho.di.plugins.fileopensave.api.providers.exception.FileException
 import org.pentaho.di.plugins.fileopensave.controllers.FileController;
 import org.pentaho.di.plugins.fileopensave.providers.local.model.LocalFile;
 import org.pentaho.di.plugins.fileopensave.providers.recents.model.RecentTree;
-import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSFile;
-import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSLocation;
 import org.pentaho.di.plugins.fileopensave.providers.vfs.model.VFSTree;
 import org.pentaho.di.plugins.fileopensave.service.FileCacheService;
 import org.pentaho.di.plugins.fileopensave.service.ProviderServiceService;
@@ -114,6 +111,7 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
   public static final String PARENT_PARAM = "parent";
   public static final String TYPE_PARAM = "type";
 
+
   private String shellTitle = "Select File or Folder";
   private String objectId;
   private String name;
@@ -134,7 +132,6 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
   private static final FileController FILE_CONTROLLER;
 
   static {
-
     FILE_CONTROLLER = new FileController( FileCacheService.INSTANCE.get(), ProviderServiceService.INSTANCE.get() );
   }
 
@@ -147,16 +144,16 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
   }
 
 
-  public void open( FileDialogOperation fileDialogOperation ) {
+  public void open(FileDialogOperation fileDialogOperation ) {
     String dialogPath = fileDialogOperation.getPath() != null
             ? fileDialogOperation.getPath()
             : fileDialogOperation.getStartDir();
 
     StringBuilder clientPath = new StringBuilder();
     String cmd = fileDialogOperation.getCommand();
+    this.shellTitle = cmd;
 
-    shellTitle = StringUtils.isEmpty( cmd ) ? "" : BaseMessages.getString( PKG,
-            ( "FileOpenSaveDialog.dialog." + cmd + ".title" ) );
+    getShell().open();
 
   }
 
@@ -197,6 +194,65 @@ public class FileOpenSaveDialog extends Dialog implements FileDetails {
     select.setLayoutData( new FormDataBuilder().top( buttons, 15 ).left( 0, 0 ).right( 100, 0 )
             .bottom( helpButton.getLabel(), -20 ).result() );
 
+    Combo comboFilter = new Combo(parent, SWT.NONE);
+    PropsUI.getInstance().setLook(comboFilter);
+    //String filters = fileDialogOperation.getFilter() != null ? fileDialogOperation.getFilter() : fileDialogOperation.getDefaultFilter();
+//    if(filters != null) {
+//      String[] splitFilters = filters.split(" ");
+//      if(splitFilters.length > 0) {
+//        for (String currentFilter: splitFilters) {
+//          comboFilter.add(currentFilter);
+//        }
+//      } else {
+//        comboFilter.setItems(filters);
+//      }
+//    }
+    comboFilter.setLayoutData(new FormDataBuilder().top(select, 20).right(70, 0).result());
+
+    Button cancelButton = new Button(parent, SWT.NONE);
+    PropsUI.getInstance().setLook(cancelButton);
+    cancelButton.setLayoutData(new FormDataBuilder().top(select, 20).left(comboFilter, 15).result());
+    cancelButton.setText("Cancel");
+    cancelButton.addSelectionListener(new SelectionListener() {
+      @Override
+      public void widgetSelected(SelectionEvent selectionEvent) {
+        getShell().dispose();
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent selectionEvent) {
+
+      }
+    });
+
+    Button openButton = new Button(parent, SWT.NONE);
+    PropsUI.getInstance().setLook(openButton);
+    openButton.setLayoutData(new FormDataBuilder().top(select, 20).left(cancelButton, 15).result());
+    openButton.setText("Open");
+    openButton.addSelectionListener(new SelectionListener() {
+      @Override
+      public void widgetSelected(SelectionEvent selectionEvent) {
+        StructuredSelection structuredSelection = (StructuredSelection) fileTableViewer.getSelection();
+        File f = (File) structuredSelection.getFirstElement();
+        if(f != null) {
+          //        objectId
+          //fileDialogOperation.setPath(f.getPath());
+          parentPath = f.getParent();
+          type = f.getType();
+//        connection;
+         // provider = f.getProvider();
+
+          getShell().dispose();
+        } else {
+
+        }
+      }
+
+      @Override
+      public void widgetDefaultSelected(SelectionEvent selectionEvent) {
+
+      }
+    });
     return parent;
   }
 

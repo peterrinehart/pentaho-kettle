@@ -13,6 +13,7 @@ import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.KettleEnvironment;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.plugins.fileopensave.dialog.FileOpenSaveDialog;
+import org.pentaho.di.ui.core.FileDialogOperation;
 import org.pentaho.di.ui.core.PropsUI;
 
 public class DELETE_ME_TEST {
@@ -74,8 +75,8 @@ public class DELETE_ME_TEST {
                 b.addSelectionListener( new SelectionAdapter() {
                     public void widgetSelected( org.eclipse.swt.events.SelectionEvent arg0 ) {
                         FileOpenSaveDialog fosd = new FileOpenSaveDialog( getShell(), 800, 540, null );
-                        fosd.open();
 
+                        fosd.open();
                     };
 
                 } );
