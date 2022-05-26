@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>org.pentaho.di.plugins</groupId>
-      <artifactId>pentaho-metastore-locator-core</artifactId>
+      <artifactId>file-open-save-new-core</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
