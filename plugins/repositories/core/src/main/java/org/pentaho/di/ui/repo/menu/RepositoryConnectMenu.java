@@ -23,23 +23,23 @@
 package org.pentaho.di.ui.repo.menu;
 
 import org.eclipse.swt.SWT;
+
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.swt.widgets.*;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.RepositoriesMeta;
 import org.pentaho.di.repository.RepositoryMeta;
+import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
 import org.pentaho.di.ui.repo.dialog.RepositoryDialog;
+import org.pentaho.di.ui.repo.dialog.ConnManagerAndSavedReposSWT;
 import org.pentaho.di.ui.spoon.Spoon;
 
 public class RepositoryConnectMenu {
@@ -113,18 +113,33 @@ public class RepositoryConnectMenu {
     spoon.setShellText();
   }
 
+  //method 1
   private void renderConnectButton() {
+    Display display = Display.getDefault();
     connectButton = new ToolItem( toolBar, toolBar.getItems().length );
     connectButton.setText( BaseMessages.getString( PKG, "RepositoryConnectMenu.Connect" ) );
     connectButton.addSelectionListener( new SelectionAdapter() {
       @Override
       public void widgetSelected( SelectionEvent selectionEvent ) {
-        new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
+        System.out.println("data from method 1");
+        System.out.println("repoconnectcontroller getRepositories : "+repoConnectController.getRepositories());
+        System.out.println("repoconnectcontroller getCurrentRepository : "+repoConnectController.getCurrentRepository());
+        System.out.println("repoconnectcontroller getConnectedRepository : "+repoConnectController.getConnectedRepository());
+        System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
+
+        //new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
+//        Display display = Display.getDefault();
+        new ConnManagerAndSavedReposSWT(display).createDialog();
         renderAndUpdate();
       }
     } );
   }
 
+  public PropsUI getPropsUI() {
+    return PropsUI.getInstance();
+  }
+
+  //method 2
   private void renderConnectDropdown() {
     connectDropdown = new ToolItem( toolBar, SWT.DROP_DOWN, toolBar.getItems().length );
     connectDropdown.setText( BaseMessages.getString( PKG, "RepositoryConnectMenu.Connect" ) );
@@ -138,14 +153,17 @@ public class RepositoryConnectMenu {
             String truncatedName = truncateName( repositoriesMeta.getRepository( i ).getName() );
             item.setText( truncatedName );
             item.setData( repositoriesMeta.getRepository( i ).getName() );
+            System.out.println("in method 2 here : "+repositoriesMeta.getRepository( i ).getName());
             if ( spoon.rep != null && spoon.getRepositoryName().equals( repositoriesMeta.getRepository( i ).getName() ) ) {
               item.setSelection( true );
+              System.out.println("in method 2 here1 : "+item.getText());
               continue;
             }
             item.addSelectionListener( new SelectionAdapter() {
               @Override
               public void widgetSelected( SelectionEvent selectionEvent ) {
                 String repoName = (String) ( selectionEvent.widget ).getData();
+                System.out.println("get repo name from here : "+repoName);
                 RepositoryMeta repositoryMeta = repositoriesMeta.findRepository( repoName );
                 if ( repositoryMeta != null ) {
                   try {
@@ -162,7 +180,26 @@ public class RepositoryConnectMenu {
                       log.logError( "Error connecting to repository", ke );
                     }
                   } else {
-                    new RepositoryDialog( spoon.getShell(), repoConnectController ).openLogin( repositoryMeta );
+                    Display display = Display.getDefault();
+                    display.setData(repoName);
+                   // new RepositoryDialog( spoon.getShell(), repoConnectController ).openLogin( repositoryMeta );
+                    System.out.println("data from method 2");
+
+                  /*  System.out.println("repoconnectcontroller spoon.getRepositoryName(): "+spoon.getRepositoryName());
+                    System.out.println("repoconnectcontroller getRepositories : "+repoConnectController.getRepositories());
+                    System.out.println("repoconnectcontroller getCurrentRepository : "+repoConnectController.getCurrentRepository());
+                    System.out.println("repoconnectcontroller getConnectedRepository : "+repoConnectController.getConnectedRepository());
+                    System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
+                    System.out.println("repoconnectcontroller browse : "+repoConnectController.browse());
+                    System.out.println("repoconnectcontroller getCurrentUser : "+repoConnectController.getCurrentUser());
+*/
+
+                    System.out.println("reponame before calling dialog : "+repoName);
+                    new ConnManagerAndSavedReposSWT(display).createDialog();
+                    //connectDropdown.setText("amit");
+                    //getPropsUI().setLastRepositoryLogin("amit");
+
+                    System.out.println("reponame set done ....: "+repoName);
                   }
                   renderAndUpdate();
                 }
@@ -171,13 +208,24 @@ public class RepositoryConnectMenu {
           }
         }
 
+        //method 3
         new MenuItem( connectionMenu, SWT.SEPARATOR );
         MenuItem managerItem = new MenuItem( connectionMenu, SWT.NONE );
         managerItem.setText( BaseMessages.getString( PKG, "RepositoryConnectMenu.RepositoryManager" ) );
+        Display display = Display.getDefault();
         managerItem.addSelectionListener( new SelectionAdapter() {
           @Override
           public void widgetSelected( SelectionEvent selectionEvent ) {
-            new RepositoryDialog( spoon.getShell(), repoConnectController ).openManager();
+        //    new RepositoryDialog( spoon.getShell(), repoConnectController ).openManager();
+
+            System.out.println("data from method 3");
+            System.out.println("repoconnectcontroller getRepositories : "+repoConnectController.getRepositories());
+            System.out.println("repoconnectcontroller getCurrentRepository : "+repoConnectController.getCurrentRepository());
+            System.out.println("repoconnectcontroller getConnectedRepository : "+repoConnectController.getConnectedRepository());
+            System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
+
+            new ConnManagerAndSavedReposSWT(display).createDialog();
+
             renderAndUpdate();
           }
         } );

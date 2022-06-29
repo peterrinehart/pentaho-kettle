@@ -350,7 +350,15 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
     connectToRepository( repositoryMeta, null, null );
   }
 
+  /**
+   * @apiNote this method connects to existing repository.
+   * @param repositoryName
+   * @param username
+   * @param password
+   * @throws KettleException
+   */
   public void connectToRepository( String repositoryName, String username, String password ) throws KettleException {
+    System.out.println("inside controller of connect to repository");
     final RepositoryMeta repositoryMeta = repositoriesMeta.findRepository( repositoryName );
     if ( repositoryMeta != null ) {
       connectToRepository( repositoryMeta, username, password );
