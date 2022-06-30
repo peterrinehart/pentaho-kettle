@@ -374,12 +374,14 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
     }
     Spoon spoon = spoonSupplier.get();
     Runnable execute = () -> {
+      System.out.println("spoon update thread started...");
       if ( spoon.getRepository() != null ) {
         spoon.closeRepository();
       } else {
         spoon.closeAllJobsAndTransformations( true );
       }
       spoon.setRepository( repository );
+      System.out.println("repo updated");
       setConnectedRepository( repositoryMeta );
       fireListeners();
       spoon.updateTreeForActiveAbstractMetas();

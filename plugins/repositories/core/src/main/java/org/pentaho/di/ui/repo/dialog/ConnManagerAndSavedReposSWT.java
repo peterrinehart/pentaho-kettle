@@ -13,7 +13,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 
     private Text txt_username;
     private Text txt_passwd;
-    private String str_repoURL;
+    private String str_repoName;
     private String str_username;
     private String str_passwd;
     private RepositoryConnectController controller;
@@ -50,18 +50,18 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 
 
         System.out.println("in conn manager rcvd selected repos: "+display.getData().toString());
-        String repo_name = display.getData().toString();
+        this.str_repoName = display.getData().toString();
         // reponame to repo url
-        RepositoryConnectController repocontroller =  new RepositoryConnectController();
-        String repo_url = repocontroller.getRepository(display.getData().toString());
-        System.out.println("got repo url : "+repo_url);
+        /*RepositoryConnectController repocontroller =  new RepositoryConnectController();
+         repo_name = repocontroller.getRepository(display.getData().toString());
+        System.out.println("got repo name : "+repo_name);
         //JSONObject obj = new JSONObject(repo_url);
-        Object obj= JSONValue.parse(repo_url);
+        Object obj= JSONValue.parse(repo_name);
         JSONObject jsonObject = (JSONObject) obj;
-        String processed_url = (String) jsonObject.get("url");
+        repo_name = (String) jsonObject.get("displayName");
 
-        System.out.println("after json processing :"+processed_url);
-
+        System.out.println("after json processing :"+repo_name);
+*/
         //setBackground(SWTResourceManager.getColor(SWT.COLOR_LIST_SELECTION));
 
         Label lblRepositoryConnection = new Label(this, SWT.CENTER);
@@ -77,7 +77,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
         Label lblRepoName = new Label(this, SWT.NONE);
         lblRepoName.setBounds(52, 140, 439, 25);
         //lblRepoName.setText(processed_url);
-        lblRepoName.setText(repo_name);
+        lblRepoName.setText(str_repoName);
 
         Label lblUserName = new Label(this, SWT.NONE);
         lblUserName.setBounds(52, 186, 109, 25);
@@ -110,17 +110,17 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 
                 str_username=txt_username.getText();
                 str_passwd=txt_passwd.getText();
-                System.out.println("processed_url :"+processed_url);
-                str_repoURL = processed_url;
+                //System.out.println("processed_repo_name :"+repo_name);
+                //str_repoURL = repo_name;
 
                 System.out.println("rcvd url, id and password");
 
-                System.out.println("rcvd repourl :"+str_repoURL);
+                System.out.println("rcvd reponame :"+str_repoName);
                 System.out.println("rcvd username :"+str_username);
                 System.out.println("rcvd password :"+str_passwd);
 
-                if(str_repoURL.isEmpty()){
-                    System.out.println("blank ip repourl");
+                if(str_repoName.isEmpty()){
+                    System.out.println("blank ip reponame");
 
                 }
                 if(str_username.isEmpty()){
@@ -133,7 +133,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
                 }
                 else{
                     System.out.println("not blank ip username and password");
-                    callLoginEndPoint(str_repoURL, str_username, str_passwd);
+                    callLoginEndPoint(str_repoName, str_username, str_passwd);
 
                 }
             }
@@ -150,20 +150,18 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 
     }
 
-    void callLoginEndPoint(String str_repoURL, String str_username, String str_passwd) {
+    void callLoginEndPoint(String str_repoName, String str_username, String str_passwd) {
 
         System.out.println("login end points called:");
-        System.out.println("url : "+str_repoURL);
+        System.out.println("repo name : "+str_repoName);
         System.out.println("username : "+ str_username);
         System.out.println("password : "+str_passwd);
         try {
             System.out.println("try block controller connect to repo");
             RepositoryConnectController newcontroller = new RepositoryConnectController();
 
-
-
             newcontroller
-                    .connectToRepository(str_repoURL, str_username, str_passwd);
+                    .connectToRepository(str_repoName, str_username, str_passwd);
 
             System.out.println("repo connection successful");
             getShell().close();

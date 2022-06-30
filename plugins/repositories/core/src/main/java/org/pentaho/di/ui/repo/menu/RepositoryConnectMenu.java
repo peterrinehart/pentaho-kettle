@@ -68,6 +68,7 @@ public class RepositoryConnectMenu {
     if ( connectDropdown != null && !connectDropdown.isDisposed() ) {
       if ( spoon.rep != null ) {
         StringBuilder connectionLabel = new StringBuilder();
+        System.out.println("show data : "+spoon.rep.getUserInfo());
         if ( spoon.rep.getUserInfo() != null ) {
           connectionLabel.append( spoon.rep.getUserInfo().getLogin() );
           connectionLabel.append( "  |  " );
@@ -102,11 +103,15 @@ public class RepositoryConnectMenu {
   }
 
   private void renderAndUpdate() {
+    System.out.println("connect dropdown val :"+connectDropdown+" isdisposed :"+connectDropdown.isDisposed());
     if ( connectDropdown != null && !connectDropdown.isDisposed() ) {
       connectDropdown.dispose();
+      System.out.println("connect dropdown disposed");
     }
+    System.out.println("connect button val :"+connectButton+" isdisposed :"+connectButton);
     if ( connectButton != null && !connectButton.isDisposed() ) {
       connectButton.dispose();
+      System.out.println("connect button disposed");
     }
     render();
     update();
@@ -115,21 +120,22 @@ public class RepositoryConnectMenu {
 
   //method 1
   private void renderConnectButton() {
-    Display display = Display.getDefault();
-    connectButton = new ToolItem( toolBar, toolBar.getItems().length );
+    //Display display = Display.getDefault();
+    System.out.println("method 1 called");
+    this.connectButton = new ToolItem( toolBar, toolBar.getItems().length );
     connectButton.setText( BaseMessages.getString( PKG, "RepositoryConnectMenu.Connect" ) );
     connectButton.addSelectionListener( new SelectionAdapter() {
       @Override
       public void widgetSelected( SelectionEvent selectionEvent ) {
         System.out.println("data from method 1");
-        System.out.println("repoconnectcontroller getRepositories : "+repoConnectController.getRepositories());
+        /*System.out.println("repoconnectcontroller getRepositories : "+repoConnectController.getRepositories());
         System.out.println("repoconnectcontroller getCurrentRepository : "+repoConnectController.getCurrentRepository());
         System.out.println("repoconnectcontroller getConnectedRepository : "+repoConnectController.getConnectedRepository());
         System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
-
+*/
         //new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
 //        Display display = Display.getDefault();
-        new ConnManagerAndSavedReposSWT(display).createDialog();
+        new ConnManagerAndSavedReposSWT(spoon.getDisplay()).createDialog();
         renderAndUpdate();
       }
     } );
@@ -141,7 +147,7 @@ public class RepositoryConnectMenu {
 
   //method 2
   private void renderConnectDropdown() {
-    connectDropdown = new ToolItem( toolBar, SWT.DROP_DOWN, toolBar.getItems().length );
+    this.connectDropdown = new ToolItem( toolBar, SWT.DROP_DOWN, toolBar.getItems().length );
     connectDropdown.setText( BaseMessages.getString( PKG, "RepositoryConnectMenu.Connect" ) );
     connectDropdown.addSelectionListener( new SelectionAdapter() {
       @Override
@@ -195,9 +201,12 @@ public class RepositoryConnectMenu {
 */
 
                     System.out.println("reponame before calling dialog : "+repoName);
-                    new ConnManagerAndSavedReposSWT(display).createDialog();
-                    //connectDropdown.setText("amit");
-                    //getPropsUI().setLastRepositoryLogin("amit");
+                    //spoon.getDisplay();
+                    new ConnManagerAndSavedReposSWT(spoon.getDisplay()).createDialog();
+
+
+                    //connectDropdown.setText(reponame);
+                    //getPropsUI().setLastRepositoryLogin(reponame);
 
                     System.out.println("reponame set done ....: "+repoName);
                   }
