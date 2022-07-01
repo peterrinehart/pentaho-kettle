@@ -135,7 +135,7 @@ public class RepositoryConnectMenu {
 */
         //new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
 //        Display display = Display.getDefault();
-        new ConnManagerAndSavedReposSWT(spoon.getDisplay()).createDialog();
+        new ConnManagerAndSavedReposSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
         renderAndUpdate();
       }
     } );
@@ -186,8 +186,8 @@ public class RepositoryConnectMenu {
                       log.logError( "Error connecting to repository", ke );
                     }
                   } else {
-                    Display display = Display.getDefault();
-                    display.setData(repoName);
+//                    Display display = Display.getDefault();
+  //                  display.setData(repoName);
                    // new RepositoryDialog( spoon.getShell(), repoConnectController ).openLogin( repositoryMeta );
                     System.out.println("data from method 2");
 
@@ -201,8 +201,8 @@ public class RepositoryConnectMenu {
 */
 
                     System.out.println("reponame before calling dialog : "+repoName);
-                    //spoon.getDisplay();
-                    new ConnManagerAndSavedReposSWT(spoon.getDisplay()).createDialog();
+                    spoon.getDisplay().setData(repoName);
+                    new ConnManagerAndSavedReposSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
 
 
                     //connectDropdown.setText(reponame);
@@ -233,7 +233,7 @@ public class RepositoryConnectMenu {
             System.out.println("repoconnectcontroller getConnectedRepository : "+repoConnectController.getConnectedRepository());
             System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
 
-            new ConnManagerAndSavedReposSWT(display).createDialog();
+            new ConnManagerAndSavedReposSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
 
             renderAndUpdate();
           }

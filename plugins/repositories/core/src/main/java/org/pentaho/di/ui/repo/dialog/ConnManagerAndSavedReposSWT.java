@@ -16,19 +16,23 @@ public class ConnManagerAndSavedReposSWT extends Shell {
     private String str_repoName;
     private String str_username;
     private String str_passwd;
-    private RepositoryConnectController controller;
+    //private RepositoryConnectController controller;
+    private Shell shell;
+    private Display display;
 
-    public ConnManagerAndSavedReposSWT( RepositoryConnectController controller ) {
-        System.out.println("creating reference of controller class");
-        this.controller = controller;
+    public ConnManagerAndSavedReposSWT( Shell shell, RepositoryConnectController controller ) {
+      //  this.controller = controller;
+        this.shell = shell;
+        this.display = shell.getDisplay();
     }
 
 
-    public void createDialog() {
+    public void createDialog(RepositoryConnectController controller) {
         try {
-            Display display = Display.getDefault();
+//            Display display = Display.getDefault();
+            System.out.println("create dialog swt try block");
 
-            ConnManagerAndSavedReposSWT shell = new ConnManagerAndSavedReposSWT(display);
+            ConnManagerAndSavedReposSWT shell = new ConnManagerAndSavedReposSWT(display,controller);
             shell.open();
             shell.layout();
             while (!shell.isDisposed()) {
@@ -45,7 +49,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
      * Create the shell.
      * @param display
      */
-    public ConnManagerAndSavedReposSWT(Display display) {
+    public ConnManagerAndSavedReposSWT(Display display, RepositoryConnectController newcontroller) {
         super(display, SWT.SHELL_TRIM);
 
 
@@ -133,7 +137,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
                 }
                 else{
                     System.out.println("not blank ip username and password");
-                    callLoginEndPoint(str_repoName, str_username, str_passwd);
+                    callLoginEndPoint(str_repoName, str_username, str_passwd,newcontroller);
 
                 }
             }
@@ -150,7 +154,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 
     }
 
-    void callLoginEndPoint(String str_repoName, String str_username, String str_passwd) {
+    void callLoginEndPoint(String str_repoName, String str_username, String str_passwd, RepositoryConnectController controller) {
 
         System.out.println("login end points called:");
         System.out.println("repo name : "+str_repoName);
@@ -158,9 +162,10 @@ public class ConnManagerAndSavedReposSWT extends Shell {
         System.out.println("password : "+str_passwd);
         try {
             System.out.println("try block controller connect to repo");
-            RepositoryConnectController newcontroller = new RepositoryConnectController();
+//            RepositoryConnectController newcontroller = new RepositoryConnectController();
 
-            newcontroller
+
+            controller
                     .connectToRepository(str_repoName, str_username, str_passwd);
 
             System.out.println("repo connection successful");
