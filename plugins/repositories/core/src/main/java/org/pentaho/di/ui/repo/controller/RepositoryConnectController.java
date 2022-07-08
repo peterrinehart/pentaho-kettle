@@ -291,7 +291,7 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
   }
 
   @SuppressWarnings( "unchecked" )
-  public String getRepositories() {
+  public List<JSONObject> getRepositories() {
     String connected = null;
     if ( spoonSupplier.get() != null && spoonSupplier.get().rep != null ) {
       connected = spoonSupplier.get().rep.getName();
@@ -307,7 +307,7 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
         list.add( repoJson );
       }
     }
-    return list.toString();
+    return list;
   }
 
   public String getRepository( String name ) {

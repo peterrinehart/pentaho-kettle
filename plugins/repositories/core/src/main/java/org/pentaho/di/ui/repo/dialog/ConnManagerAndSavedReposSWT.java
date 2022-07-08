@@ -164,6 +164,16 @@ public class ConnManagerAndSavedReposSWT extends Shell {
             System.out.println("try block controller connect to repo");
 //            RepositoryConnectController newcontroller = new RepositoryConnectController();
 
+        //below logic should be replacing active logic //do not delete
+            /*if ( controller.isRelogin() ) {
+                System.out.println("here in relogin");
+                controller
+                        .reconnectToRepository( repositoryName, repositoryName, password );
+            } else {
+                System.out.println("here in login");
+                controller
+                        .connectToRepository(repositoryName, repositoryName, password );
+            }*/
 
             controller
                     .connectToRepository(str_repoName, str_username, str_passwd);
