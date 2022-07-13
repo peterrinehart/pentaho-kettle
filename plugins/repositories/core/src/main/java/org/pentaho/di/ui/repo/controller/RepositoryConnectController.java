@@ -30,6 +30,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.LogChannelInterface;
@@ -130,14 +131,25 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
   }
 
   public String createConnection() {
+    System.out.println("inside create db connection !");
     CompletableFuture<String> future = new CompletableFuture<>();
     spoonSupplier.get().getShell().getDisplay().asyncExec( () -> {
       DatabaseDialog databaseDialog = new DatabaseDialog( spoonSupplier.get().getShell(), new DatabaseMeta() );
       databaseDialog.open();
+      System.out.println("database dialog openned");
       DatabaseMeta databaseMeta = databaseDialog.getDatabaseMeta();
       if ( databaseMeta != null ) {
         if ( !isDatabaseWithNameExist( databaseMeta, true ) ) {
+          System.out.println("before adding database meta");
+          System.out.println("database meta :"+databaseMeta.getName());
+          System.out.println("database meta :"+databaseMeta.getRepositoryDirectory().getName());
+          try {
+            System.out.println("database meta :"+databaseMeta.getURL());
+          } catch (KettleDatabaseException e) {
+            e.printStackTrace();
+          }
           addDatabase( databaseMeta );
+          System.out.println("after adding database meta");
           future.complete( databaseMeta.getName() );
         } else {
           DatabaseDialog.showDatabaseExistsDialog( spoonSupplier.get().getShell(), databaseMeta );
@@ -148,6 +160,7 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
     JSONObject jsonObject = new JSONObject();
     try {
       jsonObject.put( "name", future.get() );
+      System.out.println("returned json object :"+jsonObject.toJSONString());
       return jsonObject.toJSONString();
     } catch ( Exception e ) {
       jsonObject.put( "name", "None" );
@@ -262,6 +275,8 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
   }
 
   public RepositoryMeta createRepository( String id, Map<String, Object> items ) {
+    System.out.println("inside create repo method !");
+    System.out.println("id here :"+id);
     RepositoryMeta repositoryMeta;
     try {
       repositoryMeta = pluginRegistry.loadClass( RepositoryPluginType.class, id, RepositoryMeta.class );

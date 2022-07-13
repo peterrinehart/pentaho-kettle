@@ -67,11 +67,13 @@ public class RepositoryEndpoint {
   }
 
 
+/*
   @GET
   @Path( "/connection/create" )
   public Response createConnection() {
     return Response.ok( controller.createConnection() ).build();
   }
+*/
 
   @POST
   @Path( "/connection/edit" )

@@ -10,6 +10,8 @@ import org.json.simple.JSONValue;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RepositoryManagerFinal extends Shell {
 
@@ -45,7 +47,7 @@ public class RepositoryManagerFinal extends Shell {
 	 * Create the shell.
 	 * @param display
 	 */
-	public RepositoryManagerFinal(Display display, RepositoryConnectController newcontroller) {
+	public RepositoryManagerFinal(Display display, RepositoryConnectController controller) {
 		super(display, SWT.SHELL_TRIM);
 /*
 		list fo fetched repos :
@@ -62,11 +64,6 @@ public class RepositoryManagerFinal extends Shell {
 */
 
 //		String[] ITEMS = { "A", "B", "C", "D" };
-
-
-
-
-
 
 /*
 
@@ -88,19 +85,24 @@ public class RepositoryManagerFinal extends Shell {
 		List list = new List(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
 		list.setBounds(10, 60, 652, 496);
 
-		java.util.List<JSONObject> repolist = newcontroller.getRepositories();
+		java.util.List<JSONObject> repolist = controller.getRepositories();
 		// Add the items, one by one
 /*		for (int i = 0, n = ITEMS.length; i < n; i++) {
 			list.add(ITEMS[i]);
 		}*/
 
+		Map<String,String> repodetailsmap = new HashMap<>();
 		for (int i = 0; i < repolist.size(); i++) {
-			//System.out.println(" value of i:"+i+" "+repolist.get(i).get("displayName"));
+			System.out.println(" value of i:"+i+" "+repolist.get(i).get("displayName"));
 			String listitem="";
-			listitem="repo_Name :"+repolist.get(i).get("displayName").toString()+"  "+
-					" repo_URL :"+repolist.get(i).get("url").toString();
+			listitem=repolist.get(i).get("displayName").toString();
+			//+" ("+
+			//		repolist.get(i).get("url").toString()+")";
 //					"repo description :"+repolist.get(i).get("description").toString();
-			//System.out.println("listitem :"+listitem);
+			System.out.println("listitem :"+listitem);
+
+			repodetailsmap.put(repolist.get(i).get("displayName").toString(),repolist.get(i).get("url").toString());
+
 			list.add(listitem);
 		}
 
@@ -121,19 +123,30 @@ public class RepositoryManagerFinal extends Shell {
 			public void handleEvent(Event event) {
 				System.out.println("clicked on create new repo button");
 
-
-
-				new CreateRepoManager().createArepoManager();
+				new CreateRepoManager().createArepoManager(controller);
 			}
-
 	});
 
 		btnUpdate.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				System.out.println("clicked on update new repo button");
-				new UpdateRepoManager().updateArepoManager(event);
+				int i =list.getSelectionIndex();
+				new UpdateRepoManager(repodetailsmap,list.getItem(i)).updateArepoManager(controller);
 			}
+		});
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				System.out.println("clicked on delete repo button");
+				int i =list.getSelectionIndex();
+				System.out.println("delete index of list selection :"+i);
+				System.out.println("delete getselection of list selection :"+list.getSelection());
+				System.out.println("delete get item i list selection :"+list.getItem(i));
 
+
+
+
+	//			new UpdateRepoManager().updateArepoManager(event);
+			}
 		});
 		createContents();
 	}
@@ -144,7 +157,6 @@ public class RepositoryManagerFinal extends Shell {
 	protected void createContents() {
 		setText("SWT Application");
 		setSize(937, 646);
-
 	}
 
 	@Override
