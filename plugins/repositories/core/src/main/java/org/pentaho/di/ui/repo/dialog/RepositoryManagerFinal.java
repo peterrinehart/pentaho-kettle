@@ -122,11 +122,9 @@ public class RepositoryManagerFinal extends Shell {
 		btnCreateNew.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				System.out.println("clicked on create new repo button");
-
 				new CreateRepoManager().createArepoManager(controller);
 			}
 	});
-
 		btnUpdate.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				System.out.println("clicked on update new repo button");
@@ -134,20 +132,15 @@ public class RepositoryManagerFinal extends Shell {
 				new UpdateRepoManager(repodetailsmap,list.getItem(i)).updateArepoManager(controller);
 			}
 		});
+
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				System.out.println("clicked on delete repo button");
 				int i =list.getSelectionIndex();
-				System.out.println("delete index of list selection :"+i);
-				System.out.println("delete getselection of list selection :"+list.getSelection());
-				System.out.println("delete get item i list selection :"+list.getItem(i));
-
-
-
-
-	//			new UpdateRepoManager().updateArepoManager(event);
+				new DeleteRepoManager(repodetailsmap,list.getItem(i)).deleteArepoManager(controller);
 			}
 		});
+
 		createContents();
 	}
 
