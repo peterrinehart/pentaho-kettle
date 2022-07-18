@@ -2,8 +2,12 @@ package org.pentaho.di.ui.repo.dialog;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -14,13 +18,15 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.ui.core.FormDataBuilder;
+import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
 import org.pentaho.di.ui.spoon.Spoon;
 
 import java.util.function.Supplier;
 
-public class RepositoryConnectionSWT extends Shell {
+public class RepositoryConnectionSWT extends Dialog {
 
   private LogChannelInterface log =
     KettleLogStore.getLogChannelInterfaceFactory().create( RepositoryConnectionSWT.class );
@@ -36,6 +42,7 @@ public class RepositoryConnectionSWT extends Shell {
   //private RepositoryConnectController controller;
   private Shell shell;
   private Display display;
+  private PropsUI props;
   private static final Image LOGO = GUIResource.getInstance().getImageLogoSmall();
   //private static final String MANAGER_TITLE = BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Manager.Title" );
   private static final String LOGIN_TITLE = BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Login.Title" );
@@ -46,21 +53,116 @@ public class RepositoryConnectionSWT extends Shell {
   //public static final String HELP_URL ="Products/Use_a_Pentaho_Repository_in_PDI";
 
   public RepositoryConnectionSWT( Shell shell ) {
-    //  this.controller = controller;
-    this.shell = shell;
-    this.display = shell.getDisplay();
+    super( shell, SWT.NONE );
+    this.props = PropsUI.getInstance();
   }
 
 
   public void createDialog( String str_repoName ) {
     this.str_repoName = str_repoName;
+    Shell parent = getParent();
+    display = parent.getDisplay();
+
+    shell = new Shell( parent, SWT.DIALOG_TRIM | SWT.MIN | SWT.MAX | SWT.RESIZE );
+    props.setLook( shell );
+    shell.setLayout( new FormLayout() );
+    shell.setText( "Repository Connection" );
+
     try {
-      //            Display display = Display.getDefault();
       System.out.println( "create dialog swt try block" );
 
-      RepositoryConnectionSWT shell = new RepositoryConnectionSWT( display );
+      System.out.println( "in conn manager rcvd selected repos: " + str_repoName );
+
+//      Label lblRepositoryConnection = new Label( shell, SWT.CENTER );
+//      lblRepositoryConnection.setText( "Repository Connection" );
+//      lblRepositoryConnection.setLayoutData( new FormDataBuilder().top().left( 50, 0 ).right( 50, 0 ).result() );
+
+      Label lblConnectTo = new Label( shell, SWT.NONE );
+      props.setLook( lblConnectTo );
+      lblConnectTo.setLayoutData( new FormDataBuilder().top( 10, 0 ).left().result() );
+      lblConnectTo.setText( "Connect to :" );
+
+      Label lblRepoName = new Label( shell, SWT.NONE );
+      props.setLook( lblRepoName );
+      lblRepoName.setLayoutData( new FormDataBuilder().top( lblConnectTo ).left( 5, 0 ).result() );
+      lblRepoName.setText( str_repoName );
+
+      Label lblUserName = new Label( shell, SWT.NONE );
+      props.setLook( lblUserName );
+      lblUserName.setLayoutData( new FormDataBuilder().top( lblRepoName, 10 ).left( 5, 0 ).result() );
+      lblUserName.setText( "User name:" );
+
+      txt_username = new Text( shell, SWT.BORDER );
+      props.setLook( txt_username );
+      txt_username.setLayoutData( new FormDataBuilder().top( lblUserName ).left( 5, 0 ).right( 95, 0 ).result() );
+
+      Label lblPassword = new Label( shell, SWT.NONE );
+      props.setLook( lblPassword );
+      lblPassword.setLayoutData( new FormDataBuilder().top( txt_username, 10 ).left( 5, 0 ).result() );
+      lblPassword.setText( "Password:" );
+
+      txt_passwd = new Text( shell, SWT.BORDER );
+      props.setLook( txt_passwd );
+      txt_passwd.setLayoutData( new FormDataBuilder().top( lblPassword ).left( 5, 0 ).right( 95, 0 ).result() );
+
+      Button btnConnect_1 = new Button( shell, SWT.NONE );
+      props.setLook( btnConnect_1 );
+      btnConnect_1.setLayoutData( new FormDataBuilder().top( txt_passwd ).result() );
+      btnConnect_1.setText( "login" );
+
+      //******************** HELP **********************************
+      Button btnHelp = new Button( shell, SWT.ICON_INFORMATION );
+      props.setLook( btnHelp );
+      btnHelp.setLayoutData( new FormDataBuilder().bottom().result() );
+      btnHelp.setText( "help" );
+      btnHelp.addListener( SWT.Selection, new Listener() {
+        public void handleEvent( Event event ) {
+          System.out.println( "help button clicked" );
+          System.out.println( "help url :" + HELP_URL );
+          Program.launch( HELP_URL );
+
+        }
+      } );
+
+
+      createContents();
+
+      btnConnect_1.addListener( SWT.Selection, new Listener() {
+        public void handleEvent( Event event ) {
+          System.out.println( "button pressed" );
+
+          str_username = txt_username.getText();
+          str_passwd = txt_passwd.getText();
+          //System.out.println("processed_repo_name :"+repo_name);
+          //str_repoURL = repo_name;
+
+          System.out.println( "rcvd url, id and password" );
+
+          System.out.println( "rcvd reponame :" + str_repoName );
+          System.out.println( "rcvd username :" + str_username );
+          System.out.println( "rcvd password :" + str_passwd );
+
+          if ( str_repoName.isEmpty() ) {
+            System.out.println( "blank ip reponame" );
+
+          }
+          if ( str_username.isEmpty() ) {
+            System.out.println( "blank ip username" );
+
+          }
+          if ( str_passwd.isEmpty() ) {
+            System.out.println( "blank password" );
+
+          } else {
+            System.out.println( "not blank ip username and password" );
+            callLoginEndPoint( str_repoName, str_username, str_passwd );
+
+          }
+        }
+      } );
+      shell.pack();
+      shell.setMinimumSize( 500, 250 );
       shell.open();
-      shell.layout();
       while ( !shell.isDisposed() ) {
         if ( !display.readAndDispatch() ) {
           display.sleep();
@@ -76,105 +178,15 @@ public class RepositoryConnectionSWT extends Shell {
    *
    * @param display
    */
-  public RepositoryConnectionSWT( Display display ) {
-    super( display, SWT.SHELL_TRIM );
 
-
-    System.out.println( "in conn manager rcvd selected repos: " + display.getData().toString() );
-//    this.str_repoName = display.getData().toString();
-
-    Label lblRepositoryConnection = new Label( this, SWT.CENTER );
-    lblRepositoryConnection.setText( "Repository Connection" );
-    // lblRepositoryConnection.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.BOLD));
-    lblRepositoryConnection.setBounds( 249, 10, 320, 42 );
-
-
-    Label lblConnectTo = new Label( this, SWT.NONE );
-    lblConnectTo.setBounds( 52, 96, 121, 25 );
-    lblConnectTo.setText( "Connect to :" );
-
-    Label lblRepoName = new Label( this, SWT.NONE );
-    lblRepoName.setBounds( 52, 140, 439, 25 );
-    //lblRepoName.setText(processed_url);
-    lblRepoName.setText( str_repoName );
-
-    Label lblUserName = new Label( this, SWT.NONE );
-    lblUserName.setBounds( 52, 186, 109, 25 );
-    lblUserName.setText( "User name:" );
-
-    txt_username = new Text( this, SWT.BORDER );
-    txt_username.setBounds( 52, 217, 357, 31 );
-
-    Label lblPassword = new Label( this, SWT.NONE );
-    lblPassword.setBounds( 52, 273, 81, 25 );
-    lblPassword.setText( "Password:" );
-
-    txt_passwd = new Text( this, SWT.BORDER );
-    txt_passwd.setBounds( 52, 304, 357, 31 );
-
-    Button btnConnect_1 = new Button( this, SWT.NONE );
-    btnConnect_1.setBounds( 52, 363, 105, 35 );
-    btnConnect_1.setText( "login" );
-
-    //******************** HELP **********************************
-    Button btnHelp = new Button( this, SWT.ICON_INFORMATION );
-    btnHelp.setBounds( 599, 611, 105, 35 );
-    btnHelp.setText( "help" );
-    btnHelp.addListener( SWT.Selection, new Listener() {
-      public void handleEvent( Event event ) {
-        System.out.println( "help button clicked" );
-        System.out.println( "help url :" + HELP_URL );
-        Program.launch( HELP_URL );
-
-      }
-    } );
-
-
-    createContents();
-
-    btnConnect_1.addListener( SWT.Selection, new Listener() {
-      public void handleEvent( Event event ) {
-        System.out.println( "button pressed" );
-
-        str_username = txt_username.getText();
-        str_passwd = txt_passwd.getText();
-        //System.out.println("processed_repo_name :"+repo_name);
-        //str_repoURL = repo_name;
-
-        System.out.println( "rcvd url, id and password" );
-
-        System.out.println( "rcvd reponame :" + str_repoName );
-        System.out.println( "rcvd username :" + str_username );
-        System.out.println( "rcvd password :" + str_passwd );
-
-        if ( str_repoName.isEmpty() ) {
-          System.out.println( "blank ip reponame" );
-
-        }
-        if ( str_username.isEmpty() ) {
-          System.out.println( "blank ip username" );
-
-        }
-        if ( str_passwd.isEmpty() ) {
-          System.out.println( "blank password" );
-
-        } else {
-          System.out.println( "not blank ip username and password" );
-          callLoginEndPoint( str_repoName, str_username, str_passwd );
-
-        }
-      }
-    } );
-
-  }
 
   /**
    * Create contents of the shell.
    */
   protected void createContents() {
     setText( LOGIN_TITLE );
-    setSize( 739, 707 );
-    setImage( LOGO );
+//    setSize( 739, 707 );
+//    setImage( LOGO );
 
   }
 
@@ -202,7 +214,7 @@ public class RepositoryConnectionSWT extends Shell {
       RepositoryConnectController.getInstance().connectToRepository( str_repoName, str_username, str_passwd );
 
       System.out.println( "repo connection successful" );
-      getShell().close();
+      shell.close();
     } catch ( Exception e ) {
       System.out.println( e );
       System.out.println( "catch block of repoendpoints" );

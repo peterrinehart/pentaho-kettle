@@ -100,13 +100,9 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
 
   private static final RepositoryConnectController controller = new RepositoryConnectController();
 
-  private RepositoryConnectController(){}
-
   public static RepositoryConnectController getInstance(){
     return controller;
   }
-
-
 
   public RepositoryConnectController( PluginRegistry pluginRegistry, Supplier<Spoon> spoonSupplier,
                                       RepositoriesMeta repositoriesMeta ) {
@@ -120,11 +116,9 @@ public class RepositoryConnectController implements IConnectedRepositoryInstance
     }
   }
 
-/*
-  public RepositoryConnectController() {
+  private RepositoryConnectController() {
     this( PluginRegistry.getInstance(), Spoon::getInstance, new RepositoriesMeta() );
   }
-*/
 
   public void setParentShell( Shell shell ) {
     this.parentShell = shell;
