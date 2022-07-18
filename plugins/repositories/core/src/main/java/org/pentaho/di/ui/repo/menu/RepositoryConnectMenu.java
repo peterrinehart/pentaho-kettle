@@ -38,9 +38,7 @@ import org.pentaho.di.repository.RepositoriesMeta;
 import org.pentaho.di.repository.RepositoryMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
-import org.pentaho.di.ui.repo.dialog.RepositoryDialog;
-import org.pentaho.di.ui.repo.dialog.ConnManagerAndSavedReposSWT;
-import org.pentaho.di.ui.repo.dialog.RepositoryManagerFinal;
+import org.pentaho.di.ui.repo.dialog.RepositoryConnectionSWT;
 import org.pentaho.di.ui.repo.dialog.RepositoryManagerSWT;
 import org.pentaho.di.ui.spoon.Spoon;
 
@@ -58,10 +56,14 @@ public class RepositoryConnectMenu {
   private RepositoriesMeta repositoriesMeta;
   private final RepositoryConnectController repoConnectController;
 
+  static RepositoryConnectController getRepoControllerInstance(){
+    return RepositoryConnectController.getInstance();
+  }
+
   public RepositoryConnectMenu( Spoon spoon, ToolBar toolBar, RepositoryConnectController repoConnectController ) {
     this.toolBar = toolBar;
     this.spoon = spoon;
-    this.repoConnectController = repoConnectController;
+    this.repoConnectController = getRepoControllerInstance();
     repoConnectController.addListener( this::renderAndUpdate );
   }
 
@@ -137,7 +139,7 @@ public class RepositoryConnectMenu {
 */
         //new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
 //        Display display = Display.getDefault();
-        new ConnManagerAndSavedReposSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
+        new RepositoryConnectionSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
         renderAndUpdate();
       }
     } );
@@ -204,7 +206,7 @@ public class RepositoryConnectMenu {
 
                     System.out.println("reponame before calling dialog : "+repoName);
                     spoon.getDisplay().setData(repoName);
-                    new ConnManagerAndSavedReposSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
+                    new RepositoryConnectionSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
 
 
                     //connectDropdown.setText(reponame);
@@ -236,7 +238,7 @@ public class RepositoryConnectMenu {
             System.out.println("repoconnectcontroller getPlugins : "+repoConnectController.getPlugins());
 
             //new RepositoryManagerSWT(spoon.getShell()).createDialog(repoConnectController);
-            new RepositoryManagerFinal(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
+            new RepositoryManagerSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
 
             renderAndUpdate();
           }

@@ -75,7 +75,7 @@ public class UpdateRepoManager extends Shell {
 
 		text_repourl = new Text(this, SWT.BORDER);
 		text_repourl.setBounds(37, 249, 297, 31);
-		text_repourl.setText(repodetailsmap.get(reponame));
+		text_repourl.setText(repodetailsmap.get(reponame).substring(0,repodetailsmap.get(reponame).indexOf("~")));
 		
 		Label lblDescription = new Label(this, SWT.NONE);
 		lblDescription.setBounds(37, 297, 174, 25);
@@ -83,6 +83,7 @@ public class UpdateRepoManager extends Shell {
 
 		text_description = new Text(this, SWT.BORDER);
 		text_description.setBounds(37, 328, 297, 31);
+		text_description.setText(repodetailsmap.get(reponame).substring(repodetailsmap.get(reponame).lastIndexOf("~") + 1));
 		
 		Button btnUpdate = new Button(this, SWT.NONE);
 		btnUpdate.setBounds(37, 388, 105, 35);

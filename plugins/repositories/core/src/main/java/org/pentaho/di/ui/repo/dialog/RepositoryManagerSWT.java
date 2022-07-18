@@ -1,145 +1,167 @@
 package org.pentaho.di.ui.repo.dialog;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.*;
+import org.json.simple.JSONObject;
+import org.pentaho.di.core.logging.KettleLogStore;
+import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RepositoryManagerSWT extends Shell {
 
-    private Display display;
-    private Shell shell;
+	private Display display;
+	private Shell shell;
+	private static Class<?> PKG = RepositoryConnectionSWT.class;
+	private static final String MANAGER_TITLE = BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Manager.Title" );
+	private LogChannelInterface log =
+			KettleLogStore.getLogChannelInterfaceFactory().create( RepositoryManagerSWT.class );
+	private static final Image LOGO = GUIResource.getInstance().getImageLogoSmall();
 
-    public RepositoryManagerSWT( Shell shell, RepositoryConnectController controller ) {
-        //  this.controller = controller;
-        this.shell = shell;
-        this.display = shell.getDisplay();
-    }
+	public RepositoryManagerSWT(Shell shell, RepositoryConnectController controller ) {
+		//  this.controller = controller;
+		this.shell = shell;
+		this.display = shell.getDisplay();
+	}
+	/**
+	 * Launch the application.
+	 *
+	 */
+	public  void createDialog(RepositoryConnectController controller) {
+		try {
+			Display display = Display.getDefault();
+			RepositoryManagerSWT shell = new RepositoryManagerSWT(display,controller);
+			shell.open();
+			shell.layout();
+			while (!shell.isDisposed()) {
+				if (!display.readAndDispatch()) {
+					display.sleep();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    public void createDialog(RepositoryConnectController controller) {
-        try {
-        //    Display display = Display.getDefault();
-            RepositoryManagerSWT shell = new RepositoryManagerSWT(display,controller);
-            shell.open();
-            shell.layout();
-            while (!shell.isDisposed()) {
-                if (!display.readAndDispatch()) {
-                    display.sleep();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	/**
+	 * Create the shell.
+	 * @param display
+	 */
+	public RepositoryManagerSWT(Display display, RepositoryConnectController controller) {
+		super(display, SWT.SHELL_TRIM);
+/*
+		list fo fetched repos :
+		[{"isDefault":false,"displayName":"loc_repo",
+		"description":"Pentaho repository | http:\/\/localhost:8080\/pentaho",
+		"id":"PentahoEnterpriseRepository","url":"http:\/\/172.20.43.98:8080\/pentaho"
+		},
+		{
+		"isDefault":false,"displayName":"loc_repo_other",
+		"description":"Pentaho repository other | http:\/\/localhost:8080\/pentaho",
+		"id":"PentahoEnterpriseRepository","url":"http:\/\/172.20.43.98:8080\/pentaho"
+		}
+		]
+*/
 
-    /**
-     * Create the shell.
-     * @param display
-     */
-    public RepositoryManagerSWT(Display display, RepositoryConnectController newcontroller) {
-        super(display, SWT.SHELL_TRIM);
+//		String[] ITEMS = { "A", "B", "C", "D" };
 
-        TabFolder tabFolder = new TabFolder(this, SWT.NONE);
-        tabFolder.setBounds(0, 10, 1001, 593);
+/*
 
-        TabItem tbtmTab_create = new TabItem(tabFolder, SWT.NONE);
-        tbtmTab_create.setText("   Create   ");
+		JSONArray arr = new JSONArray(obj);
+		for (int i = 0; i < arr.length(); i++) { // Walk through the Array.
+			JSONObject obj = arr.getJSONObject(i);
+			JSONArray arr2 = obj.getJSONArray("fileName");
+			// Do whatever.
+		}
+*/
 
+		Composite composite = new Composite(this, SWT.NONE);
+		composite.setBounds(10, 10, 907, 582);
 
-        TabItem tbtmTab_update = new TabItem(tabFolder, SWT.NONE);
-        tbtmTab_update.setText("   Update   ");
+		Label lblExistingRepos = new Label(composite, SWT.NONE);
+		lblExistingRepos.setBounds(268, 21, 147, 25);
+		lblExistingRepos.setText("Existing repos");
 
-        TabItem tbtmTab_delete = new TabItem(tabFolder, SWT.NONE);
-        tbtmTab_delete.setText("   Delete   ");
+		List list = new List(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
+		list.setBounds(10, 60, 652, 496);
 
+		java.util.List<JSONObject> repolist = controller.getRepositories();
+		// Add the items, one by one
+/*		for (int i = 0, n = ITEMS.length; i < n; i++) {
+			list.add(ITEMS[i]);
+		}*/
 
+		Map<String,String> repodetailsmap = new HashMap<>();
+		for (int i = 0; i < repolist.size(); i++) {
+			System.out.println(" value of i:"+i+" "+repolist.get(i).get("displayName"));
+			String listitem="";
+			listitem=repolist.get(i).get("displayName").toString();
+			//+" ("+
+			//		repolist.get(i).get("url").toString()+")";
+//					"repo description :"+repolist.get(i).get("description").toString();
+			System.out.println("listitem :"+listitem);
 
-        Label lblNewLabel_create = new Label(tabFolder, SWT.NONE);
-        lblNewLabel_create.setText("create a repository");
-        tbtmTab_create.setControl(lblNewLabel_create);
+			repodetailsmap.put(repolist.get(i).get("displayName").toString(),repolist.get(i).get("url").toString()+"~"+repolist.get(i).get("description").toString());
 
-
-
-//        Group groupcreate = new Group(tabFolder, SWT.NONE);
-        //group.setText("Group in Tab 2");
-        this.setText("Group in Tab 2");
-        Button button = new Button(this, SWT.NONE);
-        button.setText("Button in Tab 2");
-        button.setBounds(10, 50, 130, 30);
-
-        Text text = new Text(this, SWT.BORDER);
-        text.setText("Text in Tab 2");
-        text.setBounds(10, 90, 200, 20);
-  //      tbtmTab_create.setControl(groupcreate);
-
-//----------------------------------------- create tab components start------------
-
-        Label lblRepoName_create = new Label(this, SWT.NONE);
-        lblRepoName_create.setBounds(37, 134, 240, 25);
-        lblRepoName_create.setText("Repo name");
-        tbtmTab_create.setControl(lblRepoName_create);
-
-        Text text_create = new Text(this, SWT.BORDER);
-        text_create.setBounds(37, 165, 297, 31);
-        tbtmTab_create.setControl(text_create);
-
-        Label lblRepoUrl_create = new Label(this, SWT.NONE);
-        lblRepoUrl_create.setBounds(37, 218, 81, 25);
-        lblRepoUrl_create.setText("Repo url");
-        tbtmTab_create.setControl(lblRepoUrl_create);
-
-        Text text_1_create = new Text(this, SWT.BORDER);
-        text_1_create.setBounds(37, 249, 297, 31);
-        tbtmTab_create.setControl(text_1_create);
-
-
-        Label lblDescription_create = new Label(this, SWT.NONE);
-        lblDescription_create.setBounds(37, 297, 174, 25);
-        lblDescription_create.setText("Description");
-        tbtmTab_create.setControl(lblDescription_create);
-
-        Text text_2_create = new Text(this, SWT.BORDER);
-        text_2_create.setBounds(37, 328, 297, 31);
-        tbtmTab_create.setControl(text_2_create);
-
-        Button btnCreate = new Button(this, SWT.NONE);
-        btnCreate.setBounds(37, 388, 105, 35);
-        btnCreate.setText("create");
-        tbtmTab_create.setControl(btnCreate);
-
-        //------------------------------------------------- create tab components ends --------
+			list.add(listitem);
+		}
 
 
+		Button btnCreateNew = new Button(composite, SWT.NONE);
+		btnCreateNew.setBounds(739, 126, 105, 35);
+		btnCreateNew.setText("  Create new  ");
+		
+		Button btnUpdate = new Button(composite, SWT.NONE);
+		btnUpdate.setBounds(739, 183, 105, 35);
+		btnUpdate.setText("   Update   ");
+		
+		Button btnDelete = new Button(composite, SWT.NONE);
+		btnDelete.setBounds(739, 251, 105, 35);
+		btnDelete.setText("  Delete   ");
 
+		btnCreateNew.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				System.out.println("clicked on create new repo button");
+				new CreateRepoManager().createArepoManager(controller);
+			}
+	});
+		btnUpdate.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				System.out.println("clicked on update new repo button");
+				int i =list.getSelectionIndex();
+				new UpdateRepoManager(repodetailsmap,list.getItem(i)).updateArepoManager(controller);
+			}
+		});
 
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				System.out.println("clicked on delete repo button");
+				int i =list.getSelectionIndex();
+				new DeleteRepoManager(repodetailsmap,list.getItem(i)).deleteArepoManager(controller);
+			}
+		});
 
-        Label lblNewLabel_update = new Label(tabFolder, SWT.NONE);
-        tbtmTab_update.setControl(lblNewLabel_update);
-        lblNewLabel_update.setText("update a repository");
+		createContents();
+	}
 
-        Label lblNewLabel_delete = new Label(tabFolder, SWT.NONE);
-        tbtmTab_delete.setControl(lblNewLabel_delete);
-        lblNewLabel_delete.setText("Delete repository");
-    //    Button delbutton = new Button(tabFolder, SWT.NONE);
-  //      delbutton.setText("del button");
-//        tbtmTab_delete.setControl(delbutton);
+	/**
+	 * Create contents of the shell.
+	 */
+	protected void createContents() {
+		setText(MANAGER_TITLE);
+		setSize(937, 646);
+		setImage(LOGO);
+	}
 
-
-
-
-        createContents();
-    }
-
-    /**
-     * Create contents of the shell.
-     */
-    protected void createContents() {
-        setText("SWT Application");
-        setSize(1010, 646);
-
-    }
-
-    @Override
-    protected void checkSubclass() {
-        // Disable the check that prevents subclassing of SWT components
-    }
+	@Override
+	protected void checkSubclass() {
+		// Disable the check that prevents subclassing of SWT components
+	}
 }

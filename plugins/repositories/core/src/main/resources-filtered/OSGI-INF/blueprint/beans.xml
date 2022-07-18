@@ -2,15 +2,20 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:pen="http://www.pentaho.com/xml/schemas/pentaho-blueprint"
            xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs" default-timeout="20000">
-
+<!--
   <bean id="repositoryConnectController" scope="singleton"
         class="org.pentaho.di.ui.repo.controller.RepositoryConnectController">
   </bean>
+
+
+
 
   <bean id="repositoriesSpoonPlugin" class="org.pentaho.di.ui.repo.plugin.RepositorySpoonPlugin"
         scope="singleton" destroy-method="removeFromContainer">
     <argument ref="repositoryConnectController"/>
   </bean>
+-->
+
 
   <bean id="repositorySpoonStartExtensionPoint" scope="singleton"
         class="org.pentaho.di.ui.repo.extension.RepositorySpoonStartExtensionPoint">

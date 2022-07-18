@@ -5,7 +5,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.*;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
-import org.pentaho.di.ui.repo.model.RepositoryModel;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -68,6 +67,7 @@ public class DeleteRepoManager extends Shell {
         text_reponame = new Text(this, SWT.BORDER);
         text_reponame.setBounds(37, 165, 297, 31);
         text_reponame.setText(reponame);
+        text_reponame.setEditable(false);
 
         Label lblRepoUrl = new Label(this, SWT.NONE);
         lblRepoUrl.setBounds(37, 218, 81, 25);
@@ -75,7 +75,8 @@ public class DeleteRepoManager extends Shell {
 
         text_repourl = new Text(this, SWT.BORDER);
         text_repourl.setBounds(37, 249, 297, 31);
-        text_repourl.setText(repodetailsmap.get(reponame));
+        text_repourl.setText(repodetailsmap.get(reponame).substring(0,repodetailsmap.get(reponame).indexOf("~")));
+        text_repourl.setEditable(false);
 
         Label lblDescription = new Label(this, SWT.NONE);
         lblDescription.setBounds(37, 297, 174, 25);
@@ -83,11 +84,14 @@ public class DeleteRepoManager extends Shell {
 
         text_description = new Text(this, SWT.BORDER);
         text_description.setBounds(37, 328, 297, 31);
+        text_description.setText(repodetailsmap.get(reponame).substring(repodetailsmap.get(reponame).lastIndexOf("~") + 1));
+        text_description.setEditable(false);
 
-        Button btnUpdate = new Button(this, SWT.NONE);
-        btnUpdate.setBounds(37, 388, 105, 35);
-        btnUpdate.setText("delete");
-        btnUpdate.addSelectionListener(new SelectionAdapter() {
+
+        Button btnDelete = new Button(this, SWT.NONE);
+        btnDelete.setBounds(37, 388, 105, 35);
+        btnDelete.setText("delete");
+        btnDelete.addSelectionListener(new SelectionAdapter() {
             public void widgetSelected(SelectionEvent event) {
                 System.out.println("clicked on delete shell");
 

@@ -1,15 +1,26 @@
 package org.pentaho.di.ui.repo.dialog;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.custom.CCombo;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import org.pentaho.di.core.Const;
+import org.pentaho.di.core.logging.KettleLogStore;
+import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.ui.core.gui.GUIResource;
 import org.pentaho.di.ui.repo.controller.RepositoryConnectController;
+import org.pentaho.di.ui.spoon.Spoon;
 
-public class ConnManagerAndSavedReposSWT extends Shell {
+import java.util.function.Supplier;
+
+public class RepositoryConnectionSWT extends Shell {
+
+    private LogChannelInterface log =
+            KettleLogStore.getLogChannelInterfaceFactory().create( RepositoryConnectionSWT.class );
+
+    private static Class<?> PKG = RepositoryConnectionSWT.class;
+
 
     private Text txt_username;
     private Text txt_passwd;
@@ -19,8 +30,16 @@ public class ConnManagerAndSavedReposSWT extends Shell {
     //private RepositoryConnectController controller;
     private Shell shell;
     private Display display;
+    private static final Image LOGO = GUIResource.getInstance().getImageLogoSmall();
+    //private static final String MANAGER_TITLE = BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Manager.Title" );
+    private static final String LOGIN_TITLE = BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Login.Title" );
 
-    public ConnManagerAndSavedReposSWT( Shell shell, RepositoryConnectController controller ) {
+    private Supplier<Spoon> spoonSupplier;
+    public static final String HELP_URL =
+            Const.getDocUrl( BaseMessages.getString( PKG, "RepositoryDialog.Dialog.Help" ) );
+    //public static final String HELP_URL ="Products/Use_a_Pentaho_Repository_in_PDI";
+
+    public RepositoryConnectionSWT(Shell shell, RepositoryConnectController controller ) {
       //  this.controller = controller;
         this.shell = shell;
         this.display = shell.getDisplay();
@@ -32,7 +51,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
 //            Display display = Display.getDefault();
             System.out.println("create dialog swt try block");
 
-            ConnManagerAndSavedReposSWT shell = new ConnManagerAndSavedReposSWT(display,controller);
+            RepositoryConnectionSWT shell = new RepositoryConnectionSWT(display,controller);
             shell.open();
             shell.layout();
             while (!shell.isDisposed()) {
@@ -49,7 +68,7 @@ public class ConnManagerAndSavedReposSWT extends Shell {
      * Create the shell.
      * @param display
      */
-    public ConnManagerAndSavedReposSWT(Display display, RepositoryConnectController newcontroller) {
+    public RepositoryConnectionSWT(Display display, RepositoryConnectController newcontroller) {
         super(display, SWT.SHELL_TRIM);
 
 
@@ -101,10 +120,19 @@ public class ConnManagerAndSavedReposSWT extends Shell {
         btnConnect_1.setBounds(52, 363, 105, 35);
         btnConnect_1.setText("login");
 
-
+//******************** HELP **********************************
         Button btnHelp = new Button(this, SWT.ICON_INFORMATION);
         btnHelp.setBounds(599, 611, 105, 35);
         btnHelp.setText("help");
+        btnHelp.addListener(SWT.Selection, new Listener() {
+            public void handleEvent(Event event) {
+                System.out.println("help button clicked");
+                System.out.println("help url :"+HELP_URL);
+                Program.launch( HELP_URL );
+
+              }
+        });
+
 
         createContents();
 
@@ -149,8 +177,9 @@ public class ConnManagerAndSavedReposSWT extends Shell {
      * Create contents of the shell.
      */
     protected void createContents() {
-        setText("Login to repository");
+        setText(LOGIN_TITLE);
         setSize(739, 707);
+        setImage(LOGO);
 
     }
 
