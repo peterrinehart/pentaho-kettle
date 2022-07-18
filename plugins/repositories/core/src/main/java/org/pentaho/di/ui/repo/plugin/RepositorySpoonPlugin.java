@@ -47,13 +47,9 @@ public class RepositorySpoonPlugin implements SpoonPluginInterface {
     return RepositoryConnectController.getInstance();
   }
 
-
-  public RepositorySpoonPlugin( RepositoryConnectController repositoryConnectController ) {
+  public RepositorySpoonPlugin() {
     this.repositoryConnectController = getRepoControllerInstance();
   }
-
-
-
 
   @Override
   public void applyToContainer( String category, XulDomContainer container ) throws XulException {

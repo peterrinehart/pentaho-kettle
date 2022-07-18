@@ -50,8 +50,8 @@ public class RepositoryEndpoint {
 
   private RepositoryConnectController controller;
 
-  public RepositoryEndpoint( RepositoryConnectController controller ) {
-    this.controller = controller;
+  public RepositoryEndpoint() {
+    this.controller = RepositoryConnectController.getInstance();
   }
 
   @GET

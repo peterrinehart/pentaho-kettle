@@ -139,7 +139,7 @@ public class RepositoryConnectMenu {
 */
         //new RepositoryDialog( spoon.getShell(), repoConnectController ).openCreation();
 //        Display display = Display.getDefault();
-        new RepositoryConnectionSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
+        new RepositoryConnectionSWT( spoon.getShell() ).createDialog( "" );
         renderAndUpdate();
       }
     } );
@@ -205,8 +205,7 @@ public class RepositoryConnectMenu {
 */
 
                     System.out.println("reponame before calling dialog : "+repoName);
-                    spoon.getDisplay().setData(repoName);
-                    new RepositoryConnectionSWT(spoon.getShell(),repoConnectController).createDialog(repoConnectController);
+                    new RepositoryConnectionSWT( spoon.getShell() ).createDialog( repoName );
 
 
                     //connectDropdown.setText(reponame);
