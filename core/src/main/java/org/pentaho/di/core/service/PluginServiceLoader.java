@@ -41,6 +41,8 @@ public class PluginServiceLoader {
   private static final ConcurrentHashMap<PluginInterface, ServiceProviderInterface<?>> spiCache = new ConcurrentHashMap<>();
   private static final ConcurrentHashMap<ServiceProviderInterface<?>, ProviderServicePriority<?>> singletonCache = new ConcurrentHashMap<>();
   private static final ConcurrentHashMap<String, Collection<ProviderServicePriority<?>>> dynamicallyAddedServices = new ConcurrentHashMap<>();
+  // used for dynamic singleton services to register and re-register themselves ensuring only one instance at a time
+  public static final Object DEFAULT_PROVIDER = new Object();
 
   @SuppressWarnings( "unchecked" )
   public static <T> Collection<T> loadServices( Class<T> apiInterface ) throws KettlePluginException {
