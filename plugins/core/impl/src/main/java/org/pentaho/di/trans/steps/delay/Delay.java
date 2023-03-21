@@ -33,6 +33,10 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
 /**
  * Delay input row.
  *
@@ -89,6 +93,16 @@ public class Delay extends BaseStep implements StepInterface {
       }
 
       String timeOut = environmentSubstitute( meta.getTimeOut() );
+      File f = new File( "delayRowTime.txt" );
+      String newTimeOut = "";
+      try {
+        if ( f.exists() && f.canRead() ) {
+          newTimeOut = Files.readString( "delayRowTime.txt" );
+          timeOut = newTimeOut;
+        }
+      } catch ( IOException e ) {
+        // nothing
+      }
       data.timeout = Const.toInt( timeOut, 0 );
 
       if ( log.isDebug() ) {
