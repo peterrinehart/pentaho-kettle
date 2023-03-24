@@ -1419,6 +1419,12 @@ public class Const {
   public static final String SHARED_STREAMING_BATCH_POOL_SIZE = "SHARED_STREAMING_BATCH_POOL_SIZE";
 
   /**
+   * <p>This environment variable is used by the Kinesis consumer to control the number of records retrieved
+   * by the PollingConfig, if used.  Ignored with Enhanced Fan Out./p>
+   */
+  public static final String KINESIS_POLLING_CONFIG_MAX_RECORDS = "KINESIS_POLLING_CONFIG_MAX_RECORDS";
+
+  /**
    * <p>This environment variable is used to specify a location used to deploy a shim driver into PDI.</p>
    */
   public static final String SHIM_DRIVER_DEPLOYMENT_LOCATION = "SHIM_DRIVER_DEPLOYMENT_LOCATION";

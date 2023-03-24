@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2023 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -118,7 +118,8 @@ public class FixedTimeStreamWindow<I extends List> implements StreamWindow<I, Re
       .runOn( sharedStreamingBatchPoolSize > 0 ? Schedulers.from( sharedStreamingBatchPool ) : Schedulers.io(),
         rxBatchCount )
       .filter( list -> !list.isEmpty() )
-      .map( this.bufferFilter )
+      .map( this.bufferFilter ) // apply any filtering for data that should no longer be processed
+      .filter( list -> !list.isEmpty() ) // ensure at least one record is left before sending to subtrans
       .map( this::sendBufferToSubtrans )
       .filter( Optional::isPresent )
       .map( Optional::get )
