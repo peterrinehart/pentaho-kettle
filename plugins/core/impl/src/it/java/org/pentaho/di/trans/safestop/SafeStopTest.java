@@ -31,6 +31,10 @@ import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.steps.delay.Delay;
+import org.pentaho.di.trans.steps.delay.DelayMeta;
+
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
@@ -51,6 +55,10 @@ public class SafeStopTest {
     KettleClientEnvironment.init();
     PluginRegistry.addPluginType( StepPluginType.getInstance() );
     PluginRegistry.init();
+    StepPluginType.getInstance().handlePluginAnnotation(
+      DelayMeta.class,
+      DelayMeta.class.getAnnotation( org.pentaho.di.core.annotations.Step.class ),
+      Collections.emptyList(), false, null );
     if ( !Props.isInitialized() ) {
       Props.init( 0 );
     }

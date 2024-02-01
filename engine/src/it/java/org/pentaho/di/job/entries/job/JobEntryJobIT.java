@@ -34,6 +34,7 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobEntryResult;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
@@ -42,6 +43,7 @@ import org.pentaho.di.www.SlaveServerJobStatus;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.io.IOException;
 
@@ -148,16 +150,16 @@ public class JobEntryJobIT extends JobEntryJob {
   @Test
   public void testPDI18776() throws KettleException, IOException {
     KettleEnvironment.init();
-    String path = getClass().getResource( "Random_value.ktr" ).getPath();
-    Variables variables = new Variables();
-    TransMeta transMeta = new TransMeta( path, variables );
-    Trans trans = new Trans( transMeta );
-    trans.prepareExecution( null );
-    trans.startThreads();
-    trans.waitUntilFinished();
-
-    String childJobStep = trans.getSteps().get( 1 ).step.toString();
-    assertTrue( childJobStep.contains( "Dummy" ) );
+    String testKJBFullPath = this.getClass().getResource( "DummyParent.kjb" ).getFile();
+    JobMeta jm = new JobMeta( testKJBFullPath, null );
+    final Job job = new Job( null, jm );
+    job.start();
+    job.waitUntilFinished();
+    List<JobEntryResult> results = job.getJobEntryResults();
+    assertEquals( 4, results.size() );
+    for ( int i = 0; i < 4; i++ ) {
+      assertTrue( results.get( i ).getResult().getResult() );
+    }
   }
 
   @BeforeClass

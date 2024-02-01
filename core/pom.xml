@@ -506,6 +506,12 @@
       <artifactId>pentaho-encryption-support</artifactId>
       <version>${encryption-support.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 

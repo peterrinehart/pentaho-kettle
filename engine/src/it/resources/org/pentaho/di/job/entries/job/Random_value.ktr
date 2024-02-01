@@ -430,14 +430,14 @@
     <created_date>2020/04/29 17:31:13.139</created_date>
     <modified_user>-</modified_user>
     <modified_date>2020/04/29 17:31:13.139</modified_date>
-    <key_for_session_key/>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
   </notepads>
   <order>
     <hop>
-      <from>random cc numbers</from>
+      <from>Generate rows</from>
       <to>Dummy (do nothing)</to>
       <enabled>Y</enabled>
     </hop>
@@ -468,8 +468,8 @@
     </GUI>
   </step>
   <step>
-    <name>random cc numbers</name>
-    <type>RandomCCNumberGenerator</type>
+    <name>Generate rows</name>
+    <type>RowGenerator</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -480,14 +480,23 @@
     </partitioning>
     <fields>
       <field>
-        <cctype>Discover</cctype>
-        <cclen>16</cclen>
-        <ccsize>3</ccsize>
+        <name>foo</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif>foo</nullif>
+        <length>-1</length>
+        <precision>-1</precision>
+        <set_empty_string>N</set_empty_string>
       </field>
     </fields>
-    <cardNumberFieldName>Card number</cardNumberFieldName>
-    <cardLengthFieldName>Card length</cardLengthFieldName>
-    <cardTypeFieldName>Card type</cardTypeFieldName>
+    <limit>200</limit>
+    <never_ending>N</never_ending>
+    <interval_in_ms>5000</interval_in_ms>
+    <row_time_field>now</row_time_field>
+    <last_time_field>FiveSecondsAgo</last_time_field>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -497,8 +506,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>144</xloc>
-      <yloc>96</yloc>
+      <xloc>160</xloc>
+      <yloc>128</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -510,10 +519,6 @@
   <attributes>
     <group>
       <name>explorerState</name>
-      <attribute>
-        <key>random cc numbers</key>
-        <value/>
-      </attribute>
     </group>
   </attributes>
 </transformation>

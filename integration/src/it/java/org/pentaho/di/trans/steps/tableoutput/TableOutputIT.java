@@ -99,8 +99,8 @@ public class TableOutputIT extends TestCase {
 
     ValueMetaInterface[] valuesMeta =
     {
-      new ValueMetaInteger( "ID", 8, 0 ),
-      new ValueMetaInteger( "CODE", 8, 0 ), };
+      new ValueMetaInteger( "IDCOL", 8, 0 ),
+      new ValueMetaInteger( "CODECOL", 8, 0 ), };
 
     for ( int i = 0; i < valuesMeta.length; i++ ) {
       rm.addValueMeta( valuesMeta[i] );
@@ -141,9 +141,9 @@ public class TableOutputIT extends TestCase {
 
     ValueMetaInterface[] valuesMeta =
     {
-      new ValueMetaInteger( "ID", 8, 0 ),
+      new ValueMetaInteger( "IDCOL", 8, 0 ),
       new ValueMetaString( "TABLE", 30, 0 ),
-      new ValueMetaInteger( "CODE", 8, 0 ), };
+      new ValueMetaInteger( "CODECOL", 8, 0 ), };
 
     for ( int i = 0; i < valuesMeta.length; i++ ) {
       rm.addValueMeta( valuesMeta[i] );
@@ -258,8 +258,8 @@ public class TableOutputIT extends TestCase {
     ResultSet rs = db.openQuery( query );
     int idx = 0;
     while ( rs.next() ) {
-      int id = rs.getInt( "ID" );
-      int code = rs.getInt( "CODE" );
+      int id = rs.getInt( "IDCOL" );
+      int code = rs.getInt( "CODECOL" );
 
       String result = id + "|" + code;
       if ( idx > correctResults.length ) {
@@ -283,15 +283,15 @@ public class TableOutputIT extends TestCase {
    */
   public void checkResultsJIRA897( Database db ) throws Exception {
     // Table 1
-    String query = "SELECT ID, CODE FROM " + target_table1 + " ORDER BY ID";
+    String query = "SELECT IDCOL, CODECOL FROM " + target_table1 + " ORDER BY IDCOL";
 
     String[] correctResults = { "100|1000", "102|1002", "105|1005", "106|1006", };
 
     ResultSet rs = db.openQuery( query );
     int idx = 0;
     while ( rs.next() ) {
-      int id = rs.getInt( "ID" );
-      int code = rs.getInt( "CODE" );
+      int id = rs.getInt( "IDCOL" );
+      int code = rs.getInt( "CODECOL" );
 
       String result = id + "|" + code;
       if ( idx > correctResults.length ) {
@@ -307,15 +307,15 @@ public class TableOutputIT extends TestCase {
     }
 
     // Table 2
-    query = "SELECT ID, CODE FROM " + target_table2 + " ORDER BY ID";
+    query = "SELECT IDCOL, CODECOL FROM " + target_table2 + " ORDER BY IDCOL";
 
     String[] correctResults1 = { "101|1001", "103|1003", "104|1004", };
 
     rs = db.openQuery( query );
     idx = 0;
     while ( rs.next() ) {
-      int id = rs.getInt( "ID" );
-      int code = rs.getInt( "CODE" );
+      int id = rs.getInt( "IDCOL" );
+      int code = rs.getInt( "CODECOL" );
 
       String result = id + "|" + code;
       if ( idx > correctResults1.length ) {

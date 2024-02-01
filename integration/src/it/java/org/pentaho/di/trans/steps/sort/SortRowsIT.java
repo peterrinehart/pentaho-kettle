@@ -252,6 +252,7 @@ public class SortRowsIT {
     // Create a sort rows step
     //
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 10 ) );
     String[] sortFields = { "KEY1", "KEY2" };
     boolean[] ascendingFields = { true, true };
@@ -282,6 +283,7 @@ public class SortRowsIT {
   public void testSortRows2() throws Exception {
 
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 10 ) );
     String[] sortFields = { "KEY1", "KEY2" };
     boolean[] ascendingFields = { false, false };
@@ -312,6 +314,7 @@ public class SortRowsIT {
   public void testSortRows3() throws Exception {
 
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 10 ) );
     String[] sortFields = { "KEY1", "KEY2" };
     boolean[] ascendingFields = { true, true };
@@ -376,8 +379,9 @@ public class SortRowsIT {
    * @throws KettleException
    */
   @Test
-  public void test2GrouppingSort() throws KettleException {
+  public void test2GroupingSort() throws KettleException {
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 100 ) );
 
     boolean asc = false;
@@ -413,6 +417,7 @@ public class SortRowsIT {
   @Test
   public void test1GroupingSort() throws KettleException {
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 100 ) );
 
     String[] sortFields = { INTG1, INT };
@@ -447,6 +452,7 @@ public class SortRowsIT {
   public void testSortCaseSensitive() throws KettleException {
 
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 100 ) );
     String[] sortFields = { STR };
 
@@ -482,6 +488,7 @@ public class SortRowsIT {
   @Test
   public void testStringSortedCaseInsensitive() throws KettleException {
     SortRowsMeta srm = new SortRowsMeta();
+    srm.setDefault();
     srm.setSortSize( Integer.toString( MAX_COUNT / 100 ) );
     String[] sortFields = { STR };
 

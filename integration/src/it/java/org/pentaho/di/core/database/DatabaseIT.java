@@ -225,7 +225,7 @@ public class DatabaseIT {
     RowMetaInterface rm = new RowMeta();
 
     ValueMetaInterface[] valuesMeta =
-    { new ValueMetaInteger( "ID" ), new ValueMetaInteger( "VALUE" ), };
+    { new ValueMetaInteger( "ID" ), new ValueMetaInteger( "VAL" ), };
 
     for ( int i = 0; i < valuesMeta.length; i++ ) {
       valuesMeta[i].setLength( 8 );
