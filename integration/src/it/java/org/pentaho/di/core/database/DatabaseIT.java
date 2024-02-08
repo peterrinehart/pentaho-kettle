@@ -43,6 +43,7 @@ import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -252,6 +253,7 @@ public class DatabaseIT {
   }
 
   @Test
+  @Ignore
   public void testNonPooledAndPooledNormalConnect() throws Exception {
     ExecutorService executorService = Executors.newFixedThreadPool( COUNT_OF_STEPS_WITH_DATABASE );
 

@@ -65,10 +65,10 @@ public class TableOutputIT extends TestCase {
       + "<access>Native</access>" + "<database>mem:db</database>" + "<port></port>" + "<username>sa</username>"
       + "<password></password>" + "</connection>", };
 
-  private static String target_table = "table";
-  private static String target_table1 = "table1";
-  private static String target_table2 = "table2";
-  private static String target_table3 = "table3";
+  private static String target_table = "tablename";
+  private static String target_table1 = "tablename1";
+  private static String target_table2 = "tablename2";
+  private static String target_table3 = "tablename3";
 
   /**
    * Create table for the normal case.
@@ -142,7 +142,7 @@ public class TableOutputIT extends TestCase {
     ValueMetaInterface[] valuesMeta =
     {
       new ValueMetaInteger( "IDCOL", 8, 0 ),
-      new ValueMetaString( "TABLE", 30, 0 ),
+      new ValueMetaString( "TABLENAME", 30, 0 ),
       new ValueMetaInteger( "CODECOL", 8, 0 ), };
 
     for ( int i = 0; i < valuesMeta.length; i++ ) {
@@ -250,7 +250,7 @@ public class TableOutputIT extends TestCase {
    *          database to use.
    */
   public void checkResultsNormal( Database db ) throws Exception {
-    String query = "SELECT ID, CODE FROM " + target_table + " ORDER BY ID";
+    String query = "SELECT IDCOL, CODECOL FROM " + target_table + " ORDER BY IDCOL";
 
     String[] correctResults =
     { "100|1000", "101|1001", "102|1002", "103|1003", "104|1004", "105|1005", "106|1006", };
@@ -460,7 +460,7 @@ public class TableOutputIT extends TestCase {
     TableOutputMeta tom = new TableOutputMeta();
     tom.setDatabaseMeta( transMeta.findDatabase( "db" ) );
     tom.setTableNameInField( true );
-    tom.setTableNameField( "TABLE" );
+    tom.setTableNameField( "TABLENAME" );
     tom.setTableNameInTable( false );
 
     String fromid = registry.getPluginId( StepPluginType.class, tom );

@@ -31,6 +31,7 @@ import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.logging.KettleLogStore;
 import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobMeta;
 
 public class CopyFilesIT {
 
@@ -73,6 +74,7 @@ public class CopyFilesIT {
 
     // the parent job
     Job parentJob = new Job();
+    JobMeta parentJobMeta = new JobMeta();
 
     // Set up the job entry to do wildcard copy
     JobEntryCopyFiles jobEntry = new JobEntryCopyFiles( "Job entry copy files" );
@@ -80,6 +82,7 @@ public class CopyFilesIT {
     jobEntry.destination_filefolder = new String[] { destinationFolder };
     jobEntry.wildcard = new String[] { "" };
     jobEntry.setParentJob( parentJob );
+    jobEntry.setParentJobMeta( parentJobMeta );
 
     // Check the result for errors.
     Result result = jobEntry.execute( createStartJobEntryResult(), 1 );

@@ -25,7 +25,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.matchers.JUnitMatchers.hasItem;
+import static org.junit.Assert.assertTrue;
+
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -48,6 +49,8 @@ import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.steps.dummytrans.DummyTransMeta;
 import org.pentaho.di.trans.steps.injector.InjectorMeta;
+
+import java.util.Arrays;
 
 public class TransExecutorIT {
   private static final String SAMPLE_INPUT = "abc";
@@ -137,9 +140,7 @@ public class TransExecutorIT {
     trans.waitUntilFinished();
 
     assertEquals( EXPECTED_SUBTRANS_OUTPUT_AMOUNT, endRc.getRowsWritten().size() );
-    assertThat( asList( endRc.getRowsWritten().get( 0 ).getData() ),
-      hasItem( (Object) EXPECTED_SUBTRANS_OUTPUT_PATTERN )
-    );
+    assertTrue( Arrays.stream( endRc.getRowsWritten().get( 0 ).getData() ).anyMatch( i -> i.toString().equals( EXPECTED_SUBTRANS_OUTPUT_PATTERN ) ) );
   }
 
   private static Trans createTrans( TransMeta transMeta ) throws Exception {
@@ -183,9 +184,7 @@ public class TransExecutorIT {
     trans.waitUntilFinished();
 
     assertEquals( testInput.size(), endRc.getRowsWritten().size() );
-    assertThat( asList( endRc.getRowsWritten().get( 0 ).getData() ),
-      hasItem( (Object) SAMPLE_INPUT )
-    );
+    assertTrue( Arrays.stream( endRc.getRowsWritten().get( 0 ).getData() ).anyMatch( i -> i.toString().equals( SAMPLE_INPUT ) ) );
   }
 
 
