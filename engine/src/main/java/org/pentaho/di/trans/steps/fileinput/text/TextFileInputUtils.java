@@ -2,7 +2,7 @@
  *
  * Pentaho Data Integration
  *
- * Copyright (C) 2002-2022 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  *******************************************************************************
  *
@@ -25,7 +25,9 @@ package org.pentaho.di.trans.steps.fileinput.text;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,6 +56,9 @@ import org.pentaho.di.trans.steps.file.BaseFileInputAdditionalField;
  */
 public class TextFileInputUtils {
   private static Class<?> PKG = TextFileInputUtils.class; // for i18n purposes, needed by Translator2!!
+
+  private static Map<String, Pattern> patternMap = new HashMap();
+  private static Map<String, String> replacementMap = new HashMap<>();
 
   public static final String[] guessStringsFromLine( VariableSpace space, LogChannelInterface log, String line,
       TextFileInputMeta inf, String delimiter, String enclosure, String escapeCharacter ) throws KettleException {
@@ -226,7 +231,7 @@ public class TextFileInputUtils {
             String replace = escapeCharacter + enclosure;
             String replaceWith = enclosure;
 
-            pol = Const.replace( pol, replace, replaceWith );
+            pol = StringUtils.replace( pol, replace, replaceWith );
           }
 
           // replace the escaped separators with separators...
@@ -234,7 +239,7 @@ public class TextFileInputUtils {
             String replace = escapeCharacter + delimiter;
             String replaceWith = delimiter;
 
-            pol = Const.replace( pol, replace, replaceWith );
+            pol = StringUtils.replace( pol, replace, replaceWith );
           }
 
           // replace the escaped escape with escape...
@@ -242,7 +247,7 @@ public class TextFileInputUtils {
             String replace = escapeCharacter + escapeCharacter;
             String replaceWith = escapeCharacter;
 
-            pol = Const.replace( pol, replace, replaceWith );
+            pol = StringUtils.replace( pol, replace, replaceWith );
           }
 
           // Now add pol to the strings found!
@@ -281,6 +286,24 @@ public class TextFileInputUtils {
     }
 
     return strings.toArray( new String[strings.size()] );
+  }
+
+  public static String memoizeReplace( String inputString, String toReplace, String replaceWith ) {
+    Pattern p = null;
+    String quotedReplacement = null;
+    if ( !patternMap.containsKey( toReplace ) ) {
+      p = Pattern.compile( Pattern.quote( toReplace ) );
+      patternMap.put( toReplace, p );
+    } else {
+      p = patternMap.get( toReplace );
+    }
+    if ( !replacementMap.containsKey( replaceWith ) ) {
+      quotedReplacement = Matcher.quoteReplacement( replaceWith );
+      replacementMap.put( replaceWith, quotedReplacement );
+    } else {
+      quotedReplacement = replacementMap.get( replaceWith );
+    }
+    return p.matcher( inputString ).replaceAll( quotedReplacement );
   }
 
   public static final String getLine( LogChannelInterface log, BufferedInputStreamReader reader, int formatNr,
@@ -855,13 +878,13 @@ public class TextFileInputUtils {
             String replace = inf.content.escapeCharacter + enclosure;
             String replaceWith = enclosure;
 
-            pol = Const.replace( pol, replace, replaceWith );
+            pol = StringUtils.replace( pol, replace, replaceWith );
           } else {
             if ( contains_escaped_enclosures ) {
               String replace = inf.content.escapeCharacter + enclosure;
               String replaceWith = enclosure;
 
-              pol = Const.replace( pol, replace, replaceWith );
+              pol = StringUtils.replace( pol, replace, replaceWith );
             }
 
             contains_escaped_escape = !Utils.isEmpty( inf.content.escapeCharacter ) && pol.contains( inf.content.escapeCharacter + inf.content.escapeCharacter );
@@ -869,7 +892,7 @@ public class TextFileInputUtils {
               String replace = inf.content.escapeCharacter + inf.content.escapeCharacter;
               String replaceWith = inf.content.escapeCharacter;
 
-              pol = Const.replace( pol, replace, replaceWith );
+              pol = StringUtils.replace( pol, replace, replaceWith );
             }
           }
 
@@ -878,7 +901,7 @@ public class TextFileInputUtils {
             String replace = inf.content.escapeCharacter + delimiter;
             String replaceWith = delimiter;
 
-            pol = Const.replace( pol, replace, replaceWith );
+            pol = StringUtils.replace( pol, replace, replaceWith );
           }
 
           // Now add pol to the strings found!
@@ -991,7 +1014,7 @@ public class TextFileInputUtils {
       + Pattern.quote( regexChar );
 
     // Remove even number of escaped characters to simplify proceeded escape character detection by regex
-    String textSanitized = StringUtils.isEmpty( escapeCharacter ) ? text : text.replace( escapeCharacter + escapeCharacter, "" );
+    String textSanitized = StringUtils.isEmpty( escapeCharacter ) ? text : StringUtils.replace( text, escapeCharacter + escapeCharacter, "" );
 
     Pattern pattern = Pattern.compile( regex );
     Matcher matcher = pattern.matcher( textSanitized );
