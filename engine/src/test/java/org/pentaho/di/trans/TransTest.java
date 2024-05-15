@@ -29,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.KettleEnvironment;
@@ -81,11 +82,13 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -165,12 +168,12 @@ public class TransTest {
    */
   @Test
   public void testLoggingObjectIsNotLeakInTrans() throws Exception {
-    Repository rep = Mockito.mock( Repository.class );
+    Repository rep = mock( Repository.class );
     RepositoryDirectoryInterface repInt = Mockito.mock( RepositoryDirectoryInterface.class );
-    Mockito.when(
-      rep.loadTransformation( anyString(), Mockito.any( RepositoryDirectoryInterface.class ), Mockito
-        .any( ProgressMonitorListener.class ), Mockito.anyBoolean(), anyString() ) ).thenReturn( meta );
-    Mockito.when( rep.findDirectory( anyString() ) ).thenReturn( repInt );
+    when(
+      rep.loadTransformation( anyString(), any( RepositoryDirectoryInterface.class ),
+        nullable( ProgressMonitorListener.class ), anyBoolean(), nullable( String.class ) ) ).thenReturn( meta );
+    when( rep.findDirectory( anyString() ) ).thenReturn( repInt );
 
     Trans trans = new Trans( meta, rep, "junit", "junitDir", "fileName" );
 
@@ -247,12 +250,12 @@ public class TransTest {
     stepLogTable.setConnectionName( "connection" );
 
     meta.setStepLogTable( stepLogTable );
-    doReturn( mockedDataBase ).when( trans ).createDataBase( any( DatabaseMeta.class ) );
+    doReturn( mockedDataBase ).when( trans ).createDataBase( nullable( DatabaseMeta.class ) );
     trans.setSteps( new ArrayList<>() );
 
     trans.writeStepLogInformation();
 
-    verify( mockedDataBase ).cleanupLogRecords( eq(stepLogTable), anyString() );
+    verify( mockedDataBase ).cleanupLogRecords( eq(stepLogTable), nullable( String.class ) );
   }
 
   @Test
@@ -834,19 +837,19 @@ public class TransTest {
     doReturn("AnActualTableNametransLogTable").when(transLogTable).getActualTableName();
     doReturn("AnActualConnectionName").when(transLogTable).getActualConnectionName();
     doReturn("AnActualSchemaName").when(transLogTable).getActualSchemaName();
+    doReturn( true ).when( transLogTable ).isDefined();
+    doReturn( "1" ).when( transLogTable ).getLogInterval();
     DatabaseMeta databaseMeta = mock( DatabaseMeta.class );
     doReturn( databaseMeta).when( transLogTable ).getDatabaseMeta();
     doReturn( transLogTable).when( meta ).getTransLogTable();
     doReturn( false ).when( transLogTable ).isBatchIdUsed();
     doReturn( "MetaName" ).when( meta ).getName();
-    Database database = mock( Database.class );
-//    PowerMockito.whenNew( Database.class ).withAnyArguments().thenReturn(database);
-    doNothing().when( database ).connect();
-
-    trans.calculateBatchIdAndDateRange();
-    trans.beginProcessing();
-
-    return database;
+    try ( MockedConstruction<Database> databaseMockedConstruction =
+            mockConstruction( Database.class, ( m,c ) -> doNothing().when( m ).connect() ) ) {
+      trans.calculateBatchIdAndDateRange();
+      trans.beginProcessing();
+      return databaseMockedConstruction.constructed().get( 0 );
+    }
   }
 
   /**

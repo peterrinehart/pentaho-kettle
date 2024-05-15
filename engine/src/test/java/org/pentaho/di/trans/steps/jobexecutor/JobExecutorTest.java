@@ -40,13 +40,12 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-
-// todo Fix Me!!!
 
 /**
  * @author Mikhail_Chen-Len-Son
@@ -68,7 +67,7 @@ public class JobExecutorTest {
     meta = new JobExecutorMeta();
     data = new JobExecutorData();
     Job job = mock( Job.class );
-    doReturn( job ).when( executor ).createJob( any( Repository.class ), any( JobMeta.class ),
+    doReturn( job ).when( executor ).createJob( nullable( Repository.class ), nullable( JobMeta.class ),
       any( LoggingObjectInterface.class ) );
     doReturn( ArrayUtils.EMPTY_STRING_ARRAY ).when( job ).listParameters();
 
