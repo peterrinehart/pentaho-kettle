@@ -21,16 +21,13 @@
  ******************************************************************************/
 package org.pentaho.di.trans.steps.ssh;
 
-
 import com.trilead.ssh2.Connection;
 import com.trilead.ssh2.HTTPProxyData;
-import com.trilead.ssh2.ServerHostKeyVerifier;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.variables.VariableSpace;
@@ -48,8 +45,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-// todo Fix Me!!!
 
 public class SSHDataTest {
 
