@@ -23,6 +23,7 @@
 package org.pentaho.di.trans.steps.tableoutput;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseInterface;
@@ -116,7 +117,7 @@ public class TableOutputTest {
     when( tableOutputMeta.getSchemaName() ).thenReturn( "barSchema" );
 
     tableOutputSpy.truncateTable();
-    verify( db ).truncateTable( anyString(), anyString() );
+    verify( db ).truncateTable( any(), any() );
   }
 
   @Test
@@ -129,7 +130,7 @@ public class TableOutputTest {
     when( tableOutputMeta.getSchemaName() ).thenReturn( "barSchema" );
 
     tableOutputSpy.truncateTable();
-    verify( db ).truncateTable( anyString(), anyString() );
+    verify( db ).truncateTable( any(), any() );
   }
 
   @Test
