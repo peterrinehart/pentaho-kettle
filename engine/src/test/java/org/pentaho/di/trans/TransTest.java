@@ -43,6 +43,7 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.logging.LogStatus;
 import org.pentaho.di.core.logging.LoggingObjectInterface;
 import org.pentaho.di.core.logging.LoggingObjectLifecycleInterface;
+import org.pentaho.di.core.logging.LoggingRegistry;
 import org.pentaho.di.core.logging.StepLogTable;
 import org.pentaho.di.core.logging.TransLogTable;
 import org.pentaho.di.core.variables.VariableSpace;
@@ -106,7 +107,7 @@ public class TransTest {
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    KettleEnvironment.init();
+    //KettleEnvironment.init();
   }
 
   @Before
@@ -176,7 +177,6 @@ public class TransTest {
     when( rep.findDirectory( anyString() ) ).thenReturn( repInt );
 
     Trans trans = new Trans( meta, rep, "junit", "junitDir", "fileName" );
-
     assertEquals( "Log channel General assigned", LogChannel.GENERAL.getLogChannelId(), trans.log
       .getLogChannelId() );
   }
@@ -709,6 +709,7 @@ public class TransTest {
    */
   @Test
   public void testEndProcessing_StatusCalculation_Finished() throws Exception {
+    doCallRealMethod().when( trans ).setFinished( anyBoolean() );
     Database database = testEndProcessing_StatusCalculation_Base();
 
     // Set 'Finished'
@@ -838,7 +839,7 @@ public class TransTest {
     doReturn("AnActualConnectionName").when(transLogTable).getActualConnectionName();
     doReturn("AnActualSchemaName").when(transLogTable).getActualSchemaName();
     doReturn( true ).when( transLogTable ).isDefined();
-    doReturn( "1" ).when( transLogTable ).getLogInterval();
+    //doReturn( "1" ).when( transLogTable ).getLogInterval();
     DatabaseMeta databaseMeta = mock( DatabaseMeta.class );
     doReturn( databaseMeta).when( transLogTable ).getDatabaseMeta();
     doReturn( transLogTable).when( meta ).getTransLogTable();
