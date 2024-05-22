@@ -139,15 +139,15 @@ public class JobEntryJobTest {
     try ( MockedConstruction<JobMeta> jobMetaMockedConstruction =
             mockConstruction( JobMeta.class,
               ( mock, context ) -> {
-              if ( context.getCount() > 1 ) {
-                assertEquals( context.arguments().get( 0 ), space );
-                assertEquals( context.arguments().get( 1 ), null );
-                assertEquals( context.arguments().get( 2 ), null );
-                assertEquals( context.arguments().get( 3 ), store );
-                assertEquals( context.arguments().get( 4 ), null );
-              } else {
-                assertEquals( 0, context.arguments().size() );
-              }
+                if ( context.getCount() > 1 ) {
+                  assertEquals( context.arguments().get( 0 ), space );
+                  assertEquals( context.arguments().get( 1 ), null );
+                  assertEquals( context.arguments().get( 2 ), null );
+                  assertEquals( context.arguments().get( 3 ), store );
+                  assertEquals( context.arguments().get( 4 ), null );
+                } else {
+                  assertEquals( 0, context.arguments().size() );
+                }
               } );
           MockedConstruction<CurrentDirectoryResolver> currentDirectoryResolverMockedConstruction = mockConstruction(
             CurrentDirectoryResolver.class, ( mock, context ) ->
@@ -301,7 +301,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       JobEntryJob jej = getJej();
       jej.setSpecificationMethod( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME );
@@ -390,7 +391,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       JobEntryJob jej = getJej();
       jej.setJobName( JOB_ENTRY_FILE_NAME );
@@ -504,7 +506,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       Repository myrepo = mock( Repository.class );
       doReturn( rdi ).when( myrepo ).loadRepositoryDirectoryTree();
@@ -592,7 +595,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       doReturn( null ).when( myrepo ).getJobEntryAttributeString( any( ObjectId.class ), anyString() );
       doReturn( "rep_name" ).when( myrepo )
@@ -606,8 +610,9 @@ public class JobEntryJobTest {
 
       assertEquals( ObjectLocationSpecificationMethod.REPOSITORY_BY_NAME, jej.getSpecificationMethod() );
     }
-//    verifyNew( JobMeta.class )
-//      .withArguments( any( VariableSpace.class ), eq( "hdfs://server/path/job.kjb" ), eq( myrepo ), eq( store ), eq( null ) );
+    //    verifyNew( JobMeta.class )
+    //      .withArguments( any( VariableSpace.class ), eq( "hdfs://server/path/job.kjb" ), eq( myrepo ), eq( store )
+    //      , eq( null ) );
   }
 
   /**
@@ -623,7 +628,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       Repository myrepo = mock( Repository.class );
       doReturn( rdi ).when( myrepo ).loadRepositoryDirectoryTree();
@@ -655,7 +661,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       Repository myrepo = mock( Repository.class );
       doReturn( rdi ).when( myrepo ).loadRepositoryDirectoryTree();
@@ -716,7 +723,8 @@ public class JobEntryJobTest {
             {
               doCallRealMethod().when( mock ).normalizeSlashes( anyString() );
               doReturn( space ).when( mock ).resolveCurrentDirectory( any( ObjectLocationSpecificationMethod.class ),
-                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ), nullable( String.class ) );
+                any( VariableSpace.class ), nullable( Repository.class ), nullable( Job.class ),
+                nullable( String.class ) );
             } ) ) {
       Repository myrepo = mock( Repository.class );
       doReturn( rdi ).when( myrepo ).loadRepositoryDirectoryTree();
@@ -771,8 +779,9 @@ public class JobEntryJobTest {
 
       assertEquals( ObjectLocationSpecificationMethod.FILENAME, jej.getSpecificationMethod() );
     }
-//    verifyNew( JobMeta.class )
-//      .withArguments( any( VariableSpace.class ), eq( JOB_ENTRY_FILE_PATH ), eq( myrepo ), eq( store ), eq( null ) );
+    //    verifyNew( JobMeta.class )
+    //      .withArguments( any( VariableSpace.class ), eq( JOB_ENTRY_FILE_PATH ), eq( myrepo ), eq( store ), eq(
+    //      null ) );
   }
 
   private Node getNode( JobEntryJob jej ) throws Exception {
@@ -841,7 +850,7 @@ public class JobEntryJobTest {
             } ) ) {
       Repository myrepo = mock( Repository.class );
       JobMeta jobMeta = new JobMeta();
-      doReturn( directory ).when( rdi ).findDirectory( nullable(String.class) );
+      doReturn( directory ).when( rdi ).findDirectory( nullable( String.class ) );
       doReturn( jobMeta ).when( myrepo ).loadJob( any(), any(), any(), any() );
       doReturn( rdi ).when( myrepo ).loadRepositoryDirectoryTree();
       doReturn( null ).when( myrepo ).getJobEntryAttributeString( any( ObjectId.class ), anyString() );
@@ -860,7 +869,7 @@ public class JobEntryJobTest {
 
   private JobEntryJob getJej() {
     JobEntryJob jej = spy( new JobEntryJob( JOB_ENTRY_JOB_NAME ) );
-//    JobMeta parentJobMeta = spy( new JobMeta() );
+    //    JobMeta parentJobMeta = spy( new JobMeta() );
     //when( parentJobMeta.getNamedClusterEmbedManager() ).thenReturn( namedClusterEmbedManager );
     jej.setParentJobMeta( new JobMeta() );
     when( jej.getParentJobMeta().getNamedClusterEmbedManager() ).thenReturn( namedClusterEmbedManager );
