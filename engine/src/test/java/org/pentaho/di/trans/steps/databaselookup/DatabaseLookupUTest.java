@@ -230,7 +230,7 @@ public class DatabaseLookupUTest {
     db.setConnection( connection );
 
     db = spy( db );
-    doNothing().when( db ).normalConnect( anyString() );
+    doNothing().when( db ).normalConnect( nullable( String.class ) );
 
     ValueMetaInterface binary = new ValueMetaString( BINARY_FIELD );
     binary.setStorageType( ValueMetaInterface.STORAGE_TYPE_BINARY_STRING );
@@ -416,10 +416,11 @@ public class DatabaseLookupUTest {
                                           DatabaseLookupMeta meta ) throws KettleException {
     DatabaseLookup step = spyLookup( mockHelper, db, meta.getDatabaseMeta() );
     doNothing().when( step ).determineFieldsTypesQueryingDb();
-    doReturn( null ).when( step ).lookupValues( any( RowMetaInterface.class ), any( Object[].class ) );
+    doReturn( null ).when( step ).lookupValues( nullable( RowMetaInterface.class ), nullable( Object[].class ) );
 
     RowMeta input = new RowMeta();
     input.addValueMeta( new ValueMetaInteger( "Test" ) );
+    doCallRealMethod().when( step ).setInputRowMeta( any() );
     step.setInputRowMeta( input );
     return step;
   }
@@ -433,21 +434,26 @@ public class DatabaseLookupUTest {
     doNothing().when( db ).connect();
     doNothing().when( db ).connect( any() );
 
-    RowHandler mockRowhandler = mock( RowHandler.class );
-    when( mockRowhandler.getRow() ).thenReturn( new Object[0] );
+//    RowHandler mockRowhandler = mock( RowHandler.class );
+//    when( mockRowhandler.getRow() ).thenReturn( new Object[0] );
 
     RowMeta returnRowMeta = new RowMeta();
     returnRowMeta.addValueMeta( new ValueMetaInteger() );
     returnRowMeta.addValueMeta( new ValueMetaInteger() );
     when( db.getReturnRowMeta() ).thenReturn( returnRowMeta );
-    when( db.getTableFields( nullable( String.class ) ) ).thenReturn( returnRowMeta );
+    //when( db.getTableFields( nullable( String.class ) ) ).thenReturn( returnRowMeta );
 
     DatabaseLookupMeta meta = createTestMeta();
-    meta.setTableKeyField( new String[] { "foo" } );
+    //meta.setTableKeyField( new String[] { "foo" } );
     DatabaseLookupData data = new DatabaseLookupData();
-    data.db = db;
+    //data.db = db;
 
     DatabaseLookup step = createSpiedStep( db, mockHelper, meta );
+    doCallRealMethod().when( step ).init( any(), any() );
+    doCallRealMethod().when( step ).processRow( any(), any() );
+    doCallRealMethod().when( step ).getRow();
+    doCallRealMethod().when( step ).getRowHandler();
+    step.setStopped( false );
     step.init( meta, data );
 
     data.db = db;
