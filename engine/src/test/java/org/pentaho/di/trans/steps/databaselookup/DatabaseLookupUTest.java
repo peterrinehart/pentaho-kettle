@@ -155,10 +155,10 @@ public class DatabaseLookupUTest {
 
     RowMeta inputRowMeta = new RowMeta();
     RowSet rowSet = mock( RowSet.class );
-    when( rowSet.getRowWait( anyLong(), any( TimeUnit.class ) ) ).thenReturn( new Object[ 0 ] ).thenReturn( null );
+    when( rowSet.getRowWait( nullable( Long.class ), nullable( TimeUnit.class ) ) ).thenReturn( new Object[ 0 ] ).thenReturn( null );
     when( rowSet.getRowMeta() ).thenReturn( inputRowMeta );
 
-    when( mockHelper.trans.findRowSet( anyString(), anyInt(), anyString(), anyInt() ) ).thenReturn( rowSet );
+    when( mockHelper.trans.findRowSet( nullable( String.class ), nullable( Integer.class ), nullable( String.class ), nullable( Integer.class ) ) ).thenReturn( rowSet );
 
     when( mockHelper.transMeta.findNextSteps( ArgumentMatchers.any( StepMeta.class ) ) )
       .thenReturn( Collections.singletonList( mock( StepMeta.class ) ) );
@@ -434,19 +434,13 @@ public class DatabaseLookupUTest {
     doNothing().when( db ).connect();
     doNothing().when( db ).connect( any() );
 
-//    RowHandler mockRowhandler = mock( RowHandler.class );
-//    when( mockRowhandler.getRow() ).thenReturn( new Object[0] );
-
     RowMeta returnRowMeta = new RowMeta();
     returnRowMeta.addValueMeta( new ValueMetaInteger() );
     returnRowMeta.addValueMeta( new ValueMetaInteger() );
     when( db.getReturnRowMeta() ).thenReturn( returnRowMeta );
-    //when( db.getTableFields( nullable( String.class ) ) ).thenReturn( returnRowMeta );
 
     DatabaseLookupMeta meta = createTestMeta();
-    //meta.setTableKeyField( new String[] { "foo" } );
     DatabaseLookupData data = new DatabaseLookupData();
-    //data.db = db;
 
     DatabaseLookup step = createSpiedStep( db, mockHelper, meta );
     doCallRealMethod().when( step ).init( any(), any() );
