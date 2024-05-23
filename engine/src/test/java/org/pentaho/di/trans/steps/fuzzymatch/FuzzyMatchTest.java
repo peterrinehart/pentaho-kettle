@@ -35,6 +35,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.pentaho.di.core.RowSet;
@@ -137,7 +138,53 @@ public class FuzzyMatchTest {
     when( mockHelper.processRowsStepDataInterface.look.iterator() ).thenReturn( lookupRows.iterator() );
 
     fuzzyMatch.processRow( mockHelper.processRowsStepMetaInterface, mockHelper.processRowsStepDataInterface );
-    Assert.assertEquals( fuzzyMatch.resultRow[0], row3[0] );
+    Assert.assertEquals( row3[0], fuzzyMatch.resultRow[0] );
+  }
+
+  @Ignore
+  @Test
+  public void testProcessRow2() throws Exception {
+    fuzzyMatch =
+      new FuzzyMatchHandler( mockHelper.stepMeta, mockHelper.stepDataInterface, 0, mockHelper.transMeta,
+        mockHelper.trans );
+
+    when(mockHelper.initStepMetaInterface.getMainStreamField() ).thenReturn( "field1" );
+    when(mockHelper.initStepMetaInterface.getLookupField() ).thenReturn( "field1" );
+    when(mockHelper.initStepMetaInterface.getOutputMatchField() ).thenReturn( "field1" );
+
+    fuzzyMatch.init( mockHelper.initStepMetaInterface, mockHelper.initStepDataInterface );
+    RowSet mockRows = mockHelper.getMockInputRowSet( rows );
+    RowMetaInterface rowMetaInterface = new RowMeta();
+    ValueMetaInterface valueMeta = new ValueMetaString( "field1" );
+    valueMeta.setStorageMetadata( new ValueMetaString( "field1" ) );
+    rowMetaInterface.addValueMeta( valueMeta );
+    when( mockRows.getRowMeta() ).thenReturn( rowMetaInterface );
+    fuzzyMatch.addRowSetToInputRowSets( mockRows );
+    RowSet mockLookupRows = mockHelper.getMockInputRowSet( lookupRows );
+    RowMetaInterface lookupRowMetaInterface = new RowMeta();
+    ValueMetaInterface valueMeta2 = new ValueMetaString( "field1" );
+    valueMeta2.setStorageMetadata( new ValueMetaString( "field1" ) );
+    lookupRowMetaInterface.addValueMeta( valueMeta2 );
+    when( mockLookupRows.getRowMeta() ).thenReturn( lookupRowMetaInterface );
+    fuzzyMatch.addRowSetToInputRowSets( mockLookupRows );
+
+    StepIOMetaInterface stepIOMetaInterface = mock( StepIOMetaInterface.class );
+    when( mockHelper.processRowsStepMetaInterface.getStepIOMeta() ).thenReturn( stepIOMetaInterface );
+    StreamInterface streamInterface = mock( StreamInterface.class );
+    List<StreamInterface> streamInterfaceList = new ArrayList<StreamInterface>();
+    streamInterfaceList.add( streamInterface );
+    when( streamInterface.getStepMeta() ).thenReturn( mockHelper.stepMeta );
+
+    when( stepIOMetaInterface.getInfoStreams() ).thenReturn( streamInterfaceList );
+
+    when( mockHelper.processRowsStepMetaInterface.getAlgorithmType() ).thenReturn( 8 );
+    when(mockHelper.processRowsStepMetaInterface.getMainStreamField() ).thenReturn( "field1" );
+    mockHelper.processRowsStepDataInterface.look = mock( HashSet.class );
+    when( mockHelper.processRowsStepDataInterface.look.iterator() ).thenReturn( lookupRows.iterator() );
+    mockHelper.processRowsStepDataInterface.readLookupValues = true;
+
+    fuzzyMatch.processRow( mockHelper.processRowsStepMetaInterface, mockHelper.processRowsStepDataInterface );
+    Assert.assertEquals( row3[0], fuzzyMatch.resultRow[0] );
   }
 
   @Test
