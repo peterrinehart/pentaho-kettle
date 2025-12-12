@@ -367,6 +367,7 @@ public class PurRepository extends AbstractRepository implements Repository, Rec
   @Override public void disconnect() {
     connected = false;
     metaStore = null;
+    pur.logout();
     purRepositoryConnector.disconnect();
   }
 
