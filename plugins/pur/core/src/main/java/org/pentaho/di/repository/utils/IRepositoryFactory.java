@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementations can be used to obtain a PDI Repository instance in the platform. Created by nbaker on 11/5/15.
@@ -57,6 +59,7 @@ public interface IRepositoryFactory {
   class CachingRepositoryFactory implements IRepositoryFactory {
 
     public static final String REGION = "pdi-repository-cache";
+    private static final Map<String, Object> SESSION_LOCKS = new ConcurrentHashMap<>();
     private IRepositoryFactory delegate;
     private Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -85,18 +88,20 @@ public interface IRepositoryFactory {
       ICacheManager cacheManager = PentahoSystem.getCacheManager( session );
 
       String sessionName = session.getName();
-      Repository repository = (Repository) cacheManager.getFromRegionCache( REGION, sessionName );
-      if ( repository == null ) {
-        logger.debug( "Repository not cached for user: " + sessionName + ". Creating new Repository." );
-        repository = delegate.connect( repositoryName );
-        if ( !cacheManager.cacheEnabled( REGION ) ) {
-          cacheManager.addCacheRegion( REGION );
+      synchronized ( SESSION_LOCKS.computeIfAbsent( sessionName, k -> new Object() ) ) { // synchronized to ensure multiple request threads don't attempt to create multiple Repository instances for the same user at the same time.
+        Repository repository = (Repository) cacheManager.getFromRegionCache( REGION, sessionName );
+        if ( repository == null ) {
+          logger.debug( "Repository not cached for user: " + sessionName + ". Creating new Repository." );
+          repository = delegate.connect( repositoryName );
+          if ( !cacheManager.cacheEnabled( REGION ) ) {
+            cacheManager.addCacheRegion( REGION );
+          }
+          cacheManager.putInRegionCache( REGION, sessionName, repository );
+        } else {
+          logger.debug( "Repository was cached for user: " + sessionName );
         }
-        cacheManager.putInRegionCache( REGION, sessionName, repository );
-      } else {
-        logger.debug( "Repository was cached for user: " + sessionName );
+        return repository;
       }
-      return repository;
     }
   }
 

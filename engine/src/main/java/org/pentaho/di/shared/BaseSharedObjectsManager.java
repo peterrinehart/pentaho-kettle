@@ -21,13 +21,13 @@ import org.pentaho.di.repository.RepositoryElementInterface;
 
 import org.w3c.dom.Node;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class uses the SharedObjectsIO to retrieve and save shared objects. This is used by the UI.
@@ -41,7 +41,7 @@ public abstract class BaseSharedObjectsManager<T extends SharedObjectInterface<T
   protected SharedObjectsIO sharedObjectsIO;
   private final WeakHashMap<UpdateSubscriber, Void> changeSubscribers = new WeakHashMap<>();
 
-  private Map<String, T> sharedObjectsMap = new HashMap<>();
+  private Map<String, T> sharedObjectsMap = new ConcurrentHashMap<>();
   private volatile boolean initialized = false;
   String sharedObjectType;
 
@@ -62,7 +62,7 @@ public abstract class BaseSharedObjectsManager<T extends SharedObjectInterface<T
           try {
             sharedObjectsIO.lock();
             Map<String, Node> nodeMap = sharedObjectsIO.getSharedObjects( sharedObjectType );
-            Map<String, T> localSharedObjectMap = new HashMap<>();
+            Map<String, T> localSharedObjectMap = new ConcurrentHashMap<>();
             for ( String name : nodeMap.keySet() ) {
               T sharedObject = createSharedObjectUsingNode( nodeMap.get( name ) );
               if ( !localSharedObjectMap.containsKey( name ) ) {
@@ -158,8 +158,12 @@ public abstract class BaseSharedObjectsManager<T extends SharedObjectInterface<T
 
     try {
       sharedObjectsIO.lock();
+      String existingName = SharedObjectsIO.findSharedObjectIgnoreCase( name, sharedObjectsMap.keySet() );
+      if ( existingName == null ) {
+        return null;
+      }
       T sharedObjectInterface =
-        sharedObjectsMap.get( SharedObjectsIO.findSharedObjectIgnoreCase( name, sharedObjectsMap.keySet() ) );
+        sharedObjectsMap.get( existingName );
       return sharedObjectInterface == null ? sharedObjectInterface : sharedObjectInterface.makeClone();
     } finally {
       sharedObjectsIO.unlock();
@@ -201,7 +205,7 @@ public abstract class BaseSharedObjectsManager<T extends SharedObjectInterface<T
    * resets the caches in this manager.
    */
   public synchronized void reset() {
-    sharedObjectsMap.clear();
+    sharedObjectsMap = new ConcurrentHashMap<>();
     initialized = false;
   }
 
