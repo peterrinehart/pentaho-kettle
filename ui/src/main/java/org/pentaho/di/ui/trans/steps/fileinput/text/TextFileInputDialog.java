@@ -84,6 +84,8 @@ import org.pentaho.di.trans.steps.file.BaseFileField;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileFilter;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputHelper;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProvider;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProviderFactory;
 import org.pentaho.di.ui.core.dialog.EnterNumberDialog;
 import org.pentaho.di.ui.core.dialog.EnterSelectionDialog;
 import org.pentaho.di.ui.core.dialog.EnterTextDialog;
@@ -361,6 +363,8 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
 
   private TextFileInputMeta input;
 
+  private List<TextFileInputCsvReaderProvider> csvReaderProviders = new ArrayList<>();
+
   private Button wMinWidth;
   private Listener lsMinWidth;
 
@@ -431,6 +435,8 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
   private Text wBadFileMessageField;
 
   private FormData fdBadFileMessageField;
+
+  private static final String FILE_TYPE_FIXED = "Fixed";
 
   public TextFileInputDialog( Shell parent, Object in, TransMeta transMeta, String sname ) {
     super( parent, (BaseStepMeta) in, transMeta, sname );
@@ -1029,9 +1035,10 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
     wFiletype = new CCombo( wContentComp, SWT.BORDER | SWT.READ_ONLY );
     wFiletype.setText( BaseMessages.getString( PKG, "TextFileInputDialog.Filetype.Label" ) );
     props.setLook( wFiletype );
-    wFiletype.add( "CSV" );
-    wFiletype.add( "Fixed" );
-    wFiletype.select( 0 );
+    refreshFileTypeOptions();
+    if ( wFiletype.getItemCount() > 0 ) {
+      wFiletype.select( 0 );
+    }
     wFiletype.addModifyListener( lsMod );
     fdFiletype = new FormData();
     fdFiletype.left = new FormAttachment( middle, 0 );
@@ -2179,7 +2186,16 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
       wFilenameList.optWidth( true );
     }
     if ( meta.content.fileType != null ) {
-      wFiletype.setText( meta.content.fileType );
+      if ( FILE_TYPE_FIXED.equalsIgnoreCase( meta.content.fileType ) ) {
+        wFiletype.setText( FILE_TYPE_FIXED );
+      } else {
+        TextFileInputCsvReaderProvider provider =
+          TextFileInputCsvReaderProviderFactory.findProvider( meta.getCsvReaderProviderId() );
+        if ( provider == null ) {
+          provider = TextFileInputCsvReaderProviderFactory.getLegacyProvider();
+        }
+        wFiletype.setText( provider.getDisplayName() );
+      }
     }
     if ( meta.content.separator != null ) {
       wSeparator.setText( meta.content.separator );
@@ -2461,7 +2477,14 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
     meta.inputFiles.acceptingStepName = wAccStep.getText();
     meta.setAcceptingStep( transMeta.findStep( wAccStep.getText() ) );
 
-    meta.content.fileType = wFiletype.getText();
+    TextFileInputCsvReaderProvider selectedProvider = getSelectedCsvReaderProvider();
+    if ( FILE_TYPE_FIXED.equalsIgnoreCase( wFiletype.getText() ) ) {
+      meta.content.fileType = FILE_TYPE_FIXED;
+      meta.setCsvReaderProviderId( TextFileInputCsvReaderProviderFactory.getLegacyProvider().getId() );
+    } else {
+      meta.content.fileType = "CSV";
+      meta.setCsvReaderProviderId( selectedProvider.getId() );
+    }
     if ( preview ) {
       // mixed type for preview, for be able to eat any EOL chars
       meta.content.fileFormat = "mixed";
@@ -2576,7 +2599,7 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
   }
 
   private void get() {
-    if ( wFiletype.getText().equalsIgnoreCase( "CSV" ) ) {
+    if ( !FILE_TYPE_FIXED.equalsIgnoreCase( wFiletype.getText() ) ) {
       getFields();
     } else {
       getFixed();
@@ -3086,5 +3109,24 @@ public class TextFileInputDialog extends BaseStepDialog implements StepDialogInt
       logError( BaseMessages.getString( "FileInputDialog.ErrorGettingFileDesc.DialogMessage" ), e );
     }
     return inputStream;
+  }
+
+  private void refreshFileTypeOptions() {
+    wFiletype.removeAll();
+    csvReaderProviders = TextFileInputCsvReaderProviderFactory.getCsvReaderProviders();
+    for ( TextFileInputCsvReaderProvider provider : csvReaderProviders ) {
+      wFiletype.add( provider.getDisplayName() );
+    }
+    wFiletype.add( FILE_TYPE_FIXED );
+  }
+
+  private TextFileInputCsvReaderProvider getSelectedCsvReaderProvider() {
+    String selectedDisplayName = wFiletype.getText();
+    for ( TextFileInputCsvReaderProvider provider : csvReaderProviders ) {
+      if ( provider.getDisplayName().equals( selectedDisplayName ) ) {
+        return provider;
+      }
+    }
+    return TextFileInputCsvReaderProviderFactory.getLegacyProvider();
   }
 }

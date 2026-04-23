@@ -59,6 +59,7 @@ import org.pentaho.di.trans.steps.file.IBaseFileInputStepControl;
 import org.pentaho.di.utils.TestUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -465,6 +466,18 @@ public class TextFileInputTest {
     TransTestingUtil.assertResult( new Object[] { "zzz", "yyy", "xxx" }, output.get( 2 ) );
 
     deleteVfsFile( virtualFile );
+  }
+
+  @Test
+  public void initFailsWhenSelectedCsvProviderIsMissing() throws Exception {
+    TextFileInputMeta meta = createMetaObject( field( "col1" ) );
+    meta.content.separator = ",";
+    meta.setCsvReaderProviderId( "missing-provider" );
+
+    TextFileInputData data = new TextFileInputData();
+    TextFileInput input = StepMockUtil.getStep( TextFileInput.class, TextFileInputMeta.class, "test" );
+
+    assertFalse( input.init( meta, data ) );
   }
 
   private TextFileInputMeta createMetaObject( BaseFileField... fields ) {

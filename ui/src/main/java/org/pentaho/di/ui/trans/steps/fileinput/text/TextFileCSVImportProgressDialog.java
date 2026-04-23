@@ -46,6 +46,8 @@ import org.pentaho.di.trans.steps.file.BaseFileInputAdditionalField;
 import org.pentaho.di.trans.steps.fileinput.text.BufferedInputStreamReader;
 import org.pentaho.di.trans.steps.fileinput.text.EncodingType;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProvider;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProviderFactory;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputUtils;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileLine;
 import org.pentaho.di.ui.core.dialog.ErrorDialog;
@@ -83,6 +85,8 @@ public class TextFileCSVImportProgressDialog implements CsvInputAwareImportProgr
 
   private EncodingType encodingType;
 
+  private final TextFileInputCsvReaderProvider csvReaderProvider;
+
 
   /**
    * @deprecated construct with BufferedInputStreamReader
@@ -113,6 +117,10 @@ public class TextFileCSVImportProgressDialog implements CsvInputAwareImportProgr
     this.log = new LogChannel( transMeta );
 
     this.encodingType = EncodingType.guessEncodingType( reader.getEncoding() );
+    TextFileInputCsvReaderProvider provider =
+      TextFileInputCsvReaderProviderFactory.findProvider( meta.getCsvReaderProviderId() );
+    this.csvReaderProvider = provider == null
+      ? TextFileInputCsvReaderProviderFactory.getLegacyProvider() : provider;
 
   }
 
@@ -268,13 +276,17 @@ public class TextFileCSVImportProgressDialog implements CsvInputAwareImportProgr
 
     StringBuilder lineBuffer = new StringBuilder( 256 );
     int fileFormatType = meta.getFileFormatTypeNr();
+    String delimiter = transMeta.environmentSubstitute( meta.content.separator );
+    String enclosure = transMeta.environmentSubstitute( meta.content.enclosure );
+    String escapeCharacter = transMeta.environmentSubstitute( meta.content.escapeCharacter );
 
     if ( meta.content.header ) {
-      fileLineNumber = TextFileInputUtils.skipLines( log, reader, encodingType, fileFormatType, lineBuffer,
-        meta.content.nrHeaderLines, meta.getEnclosure(), meta.getEscapeCharacter(), fileLineNumber );
+      fileLineNumber = csvReaderProvider.skipLines( log, reader, encodingType, fileFormatType, lineBuffer,
+        meta.content.nrHeaderLines, delimiter, enclosure, escapeCharacter, fileLineNumber );
     }
     //Reading the first line of data
-    line = TextFileInputUtils.getLine( log, reader, encodingType, fileFormatType, lineBuffer, meta.getEnclosure(), meta.getEscapeCharacter() );
+    line = csvReaderProvider.getLine( log, reader, encodingType, fileFormatType, lineBuffer, delimiter, enclosure,
+      escapeCharacter, fileLineNumber ).getLine();
     int linenr = 1;
 
     List<StringEvaluator> evaluators = new ArrayList<StringEvaluator>();
@@ -304,11 +316,8 @@ public class TextFileCSVImportProgressDialog implements CsvInputAwareImportProgr
         valueMeta.setStorageType( ValueMetaInterface.STORAGE_TYPE_NORMAL );
       }
 
-      String delimiter = transMeta.environmentSubstitute( meta.content.separator );
-      String enclosure = transMeta.environmentSubstitute( meta.content.enclosure );
-      String escapeCharacter = transMeta.environmentSubstitute( meta.content.escapeCharacter );
       Object[] r =
-        TextFileInputUtils.convertLineToRow( log, new TextFileLine( line, fileLineNumber, null ), strinfo, null, 0,
+        csvReaderProvider.convertLineToRow( log, new TextFileLine( line, fileLineNumber, null ), strinfo, null, 0,
               outputRowMeta, convertRowMeta, FileInputList.createFilePathList( transMeta.getBowl(), transMeta,
                   meta.inputFiles.fileName, meta.inputFiles.fileMask, meta.inputFiles.excludeFileMask,
                   meta.inputFiles.fileRequired, meta.inputFiles.includeSubFolderBoolean() )[0],
@@ -338,8 +347,9 @@ public class TextFileCSVImportProgressDialog implements CsvInputAwareImportProgr
       }
 
       // Grab another line...
-      TextFileLine textFileLine = TextFileInputUtils
-        .getLine( log, reader, encodingType, fileFormatType, lineBuffer, enclosure, escapeCharacter, fileLineNumber );
+      TextFileLine textFileLine = csvReaderProvider
+        .getLine( log, reader, encodingType, fileFormatType, lineBuffer, delimiter, enclosure, escapeCharacter,
+          fileLineNumber );
       line = textFileLine.getLine();
       fileLineNumber = textFileLine.getLineNumber();
     }

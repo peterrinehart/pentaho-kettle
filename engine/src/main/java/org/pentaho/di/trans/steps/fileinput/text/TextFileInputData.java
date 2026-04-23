@@ -51,6 +51,8 @@ public class TextFileInputData extends BaseFileInputStepData {
 
   public int fileType;
 
+  public TextFileInputCsvReaderProvider csvReaderProvider;
+
   /**
    * The separator (delimiter)
    */

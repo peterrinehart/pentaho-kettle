@@ -35,6 +35,7 @@ import org.pentaho.di.core.util.StringEvaluator;
 import org.pentaho.di.core.util.Utils;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.steps.common.CsvInputAwareMeta;
 
 /**
  * BaseFileImportProcessor is an abstract class that provides a framework for processing csv file to extract file
@@ -249,6 +250,20 @@ public abstract class BaseFileImportProcessor {
    */
   protected abstract TextFileInputFieldDTO convertFieldToDto( Object field );
 
+  protected TextFileLine getLine( BufferedInputStreamReader reader, EncodingType encodingType, int fileFormatType,
+                                  StringBuilder lineBuffer, String delimiter, String enclosure,
+                                  String escapeCharacter, long lineNumberInFile ) throws KettleException {
+    return TextFileInputUtils.getLine( log, reader, encodingType, fileFormatType, lineBuffer, enclosure,
+      escapeCharacter, lineNumberInFile );
+  }
+
+  protected long skipLines( BufferedInputStreamReader reader, EncodingType encodingType, int fileFormatType,
+                            StringBuilder lineBuffer, int linesToSkip, String delimiter, String enclosure,
+                            String escapeCharacter, long lineNumberInFile ) throws KettleException {
+    return TextFileInputUtils.skipLines( log, reader, encodingType, fileFormatType, lineBuffer, linesToSkip,
+      enclosure, escapeCharacter, lineNumberInFile );
+  }
+
   /**
    * Analyzes the file and generates a summary message.
    *
@@ -280,13 +295,18 @@ public abstract class BaseFileImportProcessor {
     int fileFormatType = getFileFormatTypeNr();
 
     if ( hasHeader() ) {
-      fileLineNumber = TextFileInputUtils.skipLines( log, reader, encodingType, fileFormatType, lineBuffer,
-        getHeaderLines(), getEnclosure(), getEscapeCharacter(), fileLineNumber );
+      fileLineNumber = skipLines( reader, encodingType, fileFormatType, lineBuffer, getHeaderLines(),
+        transMeta.environmentSubstitute( ((CsvInputAwareMeta) meta).getDelimiter() ),
+        transMeta.environmentSubstitute( getEnclosure() ), transMeta.environmentSubstitute( getEscapeCharacter() ),
+        fileLineNumber );
     }
 
     //Reading the first line of data
-    String line = TextFileInputUtils.getLine( log, reader, encodingType, fileFormatType, lineBuffer,
-      getEnclosure(), getEscapeCharacter() );
+    String delimiter = transMeta.environmentSubstitute( ((CsvInputAwareMeta) meta).getDelimiter() );
+    String enclosure = transMeta.environmentSubstitute( getEnclosure() );
+    String escapeCharacter = transMeta.environmentSubstitute( getEscapeCharacter() );
+    String line = getLine( reader, encodingType, fileFormatType, lineBuffer, delimiter, enclosure,
+      escapeCharacter, fileLineNumber ).getLine();
     int linenr = 1;
 
     List<StringEvaluator> evaluators = new ArrayList<>();
@@ -301,9 +321,6 @@ public abstract class BaseFileImportProcessor {
         valueMeta.setStorageType( ValueMetaInterface.STORAGE_TYPE_NORMAL );
       }
 
-      String enclosure = transMeta.environmentSubstitute( getEnclosure() );
-      String escapeCharacter = transMeta.environmentSubstitute( getEscapeCharacter() );
-
       Object[] r = convertLineToRow( new TextFileLine( line, fileLineNumber, null ), strInfo, outputRowMeta,
         convertRowMeta, failOnParseError );
 
@@ -316,8 +333,8 @@ public abstract class BaseFileImportProcessor {
       processRowData( nrfields, evaluators, rowMeta, r, failOnParseError );
       linenr++;
 
-      TextFileLine textFileLine = TextFileInputUtils.getLine( log, reader, encodingType, fileFormatType,
-        lineBuffer, enclosure, escapeCharacter, fileLineNumber );
+      TextFileLine textFileLine = getLine( reader, encodingType, fileFormatType, lineBuffer, delimiter, enclosure,
+        escapeCharacter, fileLineNumber );
       line = textFileLine.getLine();
       fileLineNumber = textFileLine.getLineNumber();
     }

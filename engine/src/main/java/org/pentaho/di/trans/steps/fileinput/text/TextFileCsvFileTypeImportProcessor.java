@@ -33,6 +33,7 @@ import org.pentaho.di.trans.steps.file.BaseFileInputAdditionalField;
 public class TextFileCsvFileTypeImportProcessor extends BaseFileImportProcessor {
 
   private final TextFileInputMeta meta;
+  private final TextFileInputCsvReaderProvider csvReaderProvider;
 
   public TextFileCsvFileTypeImportProcessor( TextFileInputMeta meta, TransMeta transMeta,
                                              BufferedInputStreamReader reader,
@@ -41,7 +42,27 @@ public class TextFileCsvFileTypeImportProcessor extends BaseFileImportProcessor 
   ) {
     super( meta, transMeta, reader, samples, showSummary );
     this.meta = meta;
+    TextFileInputCsvReaderProvider provider =
+      TextFileInputCsvReaderProviderFactory.findProvider( meta.getCsvReaderProviderId() );
+    this.csvReaderProvider = provider == null
+      ? TextFileInputCsvReaderProviderFactory.getLegacyProvider() : provider;
     this.inputFields = new BaseFileField[ meta.getInputFields().length ];
+  }
+
+  @Override
+  protected TextFileLine getLine( BufferedInputStreamReader reader, EncodingType encodingType, int fileFormatType,
+                                  StringBuilder lineBuffer, String delimiter, String enclosure,
+                                  String escapeCharacter, long lineNumberInFile ) throws KettleException {
+    return csvReaderProvider.getLine( log, reader, encodingType, fileFormatType, lineBuffer, delimiter, enclosure,
+      escapeCharacter, lineNumberInFile );
+  }
+
+  @Override
+  protected long skipLines( BufferedInputStreamReader reader, EncodingType encodingType, int fileFormatType,
+                            StringBuilder lineBuffer, int linesToSkip, String delimiter, String enclosure,
+                            String escapeCharacter, long lineNumberInFile ) throws KettleException {
+    return csvReaderProvider.skipLines( log, reader, encodingType, fileFormatType, lineBuffer, linesToSkip,
+      delimiter, enclosure, escapeCharacter, lineNumberInFile );
   }
 
   @Override
@@ -161,7 +182,7 @@ public class TextFileCsvFileTypeImportProcessor extends BaseFileImportProcessor 
   protected Object[] convertLineToRow( TextFileLine textFileLine, Object strinfo, RowMetaInterface outputRowMeta,
                                        RowMetaInterface convertRowMeta, boolean failOnParseError )
     throws KettleException {
-    return TextFileInputUtils.convertLineToRow( log, textFileLine, (TextFileInputMeta) strinfo, null, 0,
+    return csvReaderProvider.convertLineToRow( log, textFileLine, (TextFileInputMeta) strinfo, null, 0,
       outputRowMeta, convertRowMeta, getFilePath(), rowNumber,
       transMeta.environmentSubstitute( meta.content.separator ),
       transMeta.environmentSubstitute( meta.content.enclosure ),

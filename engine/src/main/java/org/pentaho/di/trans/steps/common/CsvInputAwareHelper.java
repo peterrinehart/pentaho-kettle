@@ -29,6 +29,8 @@ import org.pentaho.di.trans.steps.fileinput.text.BufferedInputStreamReader;
 import org.pentaho.di.trans.steps.fileinput.text.EncodingType;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputFieldDTO;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputMeta;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProvider;
+import org.pentaho.di.trans.steps.fileinput.text.TextFileInputCsvReaderProviderFactory;
 import org.pentaho.di.trans.steps.fileinput.text.TextFileInputUtils;
 
 import java.io.IOException;
@@ -79,12 +81,31 @@ public interface CsvInputAwareHelper {
     final EncodingType encodingType = EncodingType.guessEncodingType( reader.getEncoding() );
 
     // Read a line of data to determine the number of rows...
-    final String line = TextFileInputUtils.getLine( logChannel(), reader, encodingType, meta.getFileFormatTypeNr(),
-      new StringBuilder( 1000 ), enclosure, escapeCharacter );
+    final StringBuilder lineBuffer = new StringBuilder( 1000 );
+    final String line;
+    if ( meta instanceof TextFileInputMeta ) {
+      TextFileInputMeta textFileInputMeta = (TextFileInputMeta) meta;
+      TextFileInputCsvReaderProvider provider =
+        TextFileInputCsvReaderProviderFactory.findProvider( textFileInputMeta.getCsvReaderProviderId() );
+      if ( provider == null ) {
+        provider = TextFileInputCsvReaderProviderFactory.getLegacyProvider();
+      }
+      line = provider.getLine( logChannel(), reader, encodingType, meta.getFileFormatTypeNr(), lineBuffer,
+        delimiter, enclosure, escapeCharacter, 0 ).getLine();
+    } else {
+      line = TextFileInputUtils.getLine( logChannel(), reader, encodingType, meta.getFileFormatTypeNr(), lineBuffer,
+        enclosure, escapeCharacter );
+    }
     if ( !StringUtils.isBlank( line ) ) {
       if ( meta instanceof TextFileInputMeta ) {
-        fieldNames = TextFileInputUtils.guessStringsFromLine( transMeta.getParentVariableSpace(), logChannel(),
-          line, (TextFileInputMeta) meta, delimiter, enclosure, meta.getEscapeCharacter() );
+        TextFileInputMeta textFileInputMeta = (TextFileInputMeta) meta;
+        TextFileInputCsvReaderProvider provider =
+          TextFileInputCsvReaderProviderFactory.findProvider( textFileInputMeta.getCsvReaderProviderId() );
+        if ( provider == null ) {
+          provider = TextFileInputCsvReaderProviderFactory.getLegacyProvider();
+        }
+        fieldNames = provider.guessStringsFromLine( transMeta.getParentVariableSpace(), logChannel(), line,
+          textFileInputMeta, delimiter, enclosure, meta.getEscapeCharacter() );
       } else {
         fieldNames = CsvInput.guessStringsFromLine( logChannel(), line, delimiter, enclosure,
           meta.getEscapeCharacter() );

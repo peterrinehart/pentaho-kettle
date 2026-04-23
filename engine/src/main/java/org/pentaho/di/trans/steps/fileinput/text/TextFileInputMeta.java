@@ -91,6 +91,9 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
     @Injection( name = "FILE_TYPE" )
     public String fileType;
 
+    /** Selected CSV reader provider id when FILE_TYPE is CSV */
+    public String csvReaderProviderId;
+
     /** String used to separated field (;) */
     @Injection( name = "SEPARATOR" )
     public String separator;
@@ -324,6 +327,7 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
       }
 
       content.fileType = XMLHandler.getTagValue( stepnode, "file", "type" );
+      content.csvReaderProviderId = XMLHandler.getTagValue( stepnode, "csv_reader_provider_id" );
       content.fileCompression = XMLHandler.getTagValue( stepnode, "file", "compression" );
       if ( content.fileCompression == null ) {
         content.fileCompression = "None";
@@ -487,6 +491,7 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
     content.noEmptyLines = true;
     content.fileFormat = "DOS";
     content.fileType = "CSV";
+    content.csvReaderProviderId = LegacyTextFileInputCsvReaderProvider.ID;
     content.includeFilename = false;
     content.filenameField = "";
     content.includeRowNumber = false;
@@ -713,6 +718,7 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
     retval.append( "    " ).append( XMLHandler.addTagValue( "rownumByFile", content.rowNumberByFile ) );
     retval.append( "    " ).append( XMLHandler.addTagValue( "rownum_field", content.rowNumberField ) );
     retval.append( "    " ).append( XMLHandler.addTagValue( "format", content.fileFormat ) );
+    retval.append( "    " ).append( XMLHandler.addTagValue( "csv_reader_provider_id", getCsvReaderProviderId() ) );
     retval.append( "    " ).append( XMLHandler.addTagValue( "encoding", content.encoding ) );
     retval.append( "    " ).append( XMLHandler.addTagValue( "length", content.length ) );
     retval.append( "    " + XMLHandler.addTagValue( "add_to_result_filenames", inputFiles.isaddresult ) );
@@ -910,6 +916,7 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
         }
       }
       content.fileType = rep.getStepAttributeString( id_step, "file_type" );
+      content.csvReaderProviderId = rep.getStepAttributeString( id_step, "csv_reader_provider_id" );
       content.fileCompression = rep.getStepAttributeString( id_step, "compression" );
       if ( content.fileCompression == null ) {
         content.fileCompression = "None";
@@ -1036,6 +1043,7 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
         rep.saveStepAttribute( id_transformation, id_step, i, "include_subfolders", inputFiles.includeSubFolders[i] );
       }
       rep.saveStepAttribute( id_transformation, id_step, "file_type", content.fileType );
+      rep.saveStepAttribute( id_transformation, id_step, "csv_reader_provider_id", getCsvReaderProviderId() );
       rep.saveStepAttribute( id_transformation, id_step, "compression", ( content.fileCompression == null ) ? "None"
           : content.fileCompression );
 
@@ -1225,6 +1233,19 @@ public class TextFileInputMeta extends BaseFileInputMeta<BaseFileInputAdditional
       return TextFileInputMeta.FILE_TYPE_CSV;
     } else {
       return TextFileInputMeta.FILE_TYPE_FIXED;
+    }
+  }
+
+  public String getCsvReaderProviderId() {
+    if ( content == null || Utils.isEmpty( content.csvReaderProviderId ) ) {
+      return LegacyTextFileInputCsvReaderProvider.ID;
+    }
+    return content.csvReaderProviderId;
+  }
+
+  public void setCsvReaderProviderId( String csvReaderProviderId ) {
+    if ( content != null ) {
+      content.csvReaderProviderId = csvReaderProviderId;
     }
   }
 

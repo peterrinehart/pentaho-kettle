@@ -44,6 +44,9 @@ public class TextFileInput extends BaseFileInputStep<TextFileInputMeta, TextFile
   @Override
   protected IBaseFileInputReader createReader( TextFileInputMeta meta, TextFileInputData data, FileObject file )
     throws Exception {
+    if ( data.fileType == TextFileInputMeta.FILE_TYPE_CSV && data.csvReaderProvider != null ) {
+      return data.csvReaderProvider.createReader( this, meta, data, file, log );
+    }
     return new TextFileInputReader( this, meta, data, file, log );
   }
 
@@ -67,12 +70,21 @@ public class TextFileInput extends BaseFileInputStep<TextFileInputMeta, TextFile
     // calculate the file type in advance CSV or Fixed?
     data.fileType = meta.getFileTypeNr();
 
+    if ( data.fileType == TextFileInputMeta.FILE_TYPE_CSV ) {
+      data.csvReaderProvider = TextFileInputCsvReaderProviderFactory.findProvider( meta.getCsvReaderProviderId() );
+      if ( data.csvReaderProvider == null ) {
+        logError( BaseMessages.getString( PKG, "TextFileInput.Exception.CsvReaderProviderMissing",
+          meta.getCsvReaderProviderId() ) );
+        return false;
+      }
+    }
+
     // Handle the possibility of a variable substitution
     data.separator = environmentSubstitute( meta.content.separator );
     data.enclosure = environmentSubstitute( meta.content.enclosure );
     data.escapeCharacter = environmentSubstitute( meta.content.escapeCharacter );
     // CSV without separator defined
-    if ( meta.content.fileType.equalsIgnoreCase( "CSV" ) && ( meta.content.separator == null || meta.content.separator
+    if ( data.fileType == TextFileInputMeta.FILE_TYPE_CSV && ( meta.content.separator == null || meta.content.separator
         .isEmpty() ) ) {
       logError( BaseMessages.getString( PKG, "TextFileInput.Exception.NoSeparator" ) );
       return false;
