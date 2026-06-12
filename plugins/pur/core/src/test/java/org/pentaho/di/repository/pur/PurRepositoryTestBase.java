@@ -39,6 +39,8 @@ import org.pentaho.platform.repository2.unified.jcr.sejcr.CredentialsStrategy;
 import org.pentaho.platform.security.policy.rolebased.IRoleAuthorizationPolicyRoleBindingDao;
 import org.pentaho.platform.security.userroledao.DefaultTenantedPrincipleNameResolver;
 import org.pentaho.test.platform.engine.core.MicroPlatform;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -69,6 +71,7 @@ import static org.mockito.Mockito.when;
 @TestExecutionListeners( listeners = { DependencyInjectionTestExecutionListener.class,
   DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class } )
 public abstract class PurRepositoryTestBase extends RepositoryTestLazySupport implements ApplicationContextAware {
+  private static final Logger LOG = LoggerFactory.getLogger( PurRepositoryTestBase.class );
 
   protected static final String TEST_LOGIN = "tester";
   protected static final String TEST_TENANT = "testTenant";
@@ -109,6 +112,7 @@ public abstract class PurRepositoryTestBase extends RepositoryTestLazySupport im
   private IRepositoryVersionManager existingVersionManager;
 
   private TestContextManager testContextManager;
+  private boolean setUpCompleted;
 
   public PurRepositoryTestBase( Boolean lazyRepo ) {
     super( lazyRepo );
@@ -116,6 +120,7 @@ public abstract class PurRepositoryTestBase extends RepositoryTestLazySupport im
 
   @Before
   public void setUp() throws Exception {
+    setUpCompleted = false;
     this.testContextManager = new TestContextManager( getClass() );
     this.testContextManager.prepareTestInstance( this );
 
@@ -131,6 +136,7 @@ public abstract class PurRepositoryTestBase extends RepositoryTestLazySupport im
 
     createPurRepository();
     loginAsTester();
+    setUpCompleted = true;
   }
 
   private void mockVersionManager() {
@@ -245,6 +251,18 @@ public abstract class PurRepositoryTestBase extends RepositoryTestLazySupport im
 
   @After
   public void tearDown() throws Exception {
+    if ( !setUpCompleted ) {
+      LOG.warn( "Skipping most teardown for {} because setup did not complete. "
+          + "Use the first setup failure for triage.", getClass().getSimpleName() );
+      if ( mp != null ) {
+        mp.stop();
+        mp = null;
+      }
+      JcrRepositoryFileUtils.setRepositoryVersionManager( existingVersionManager );
+      PentahoSessionHolder.setStrategyName( PentahoSessionHolder.MODE_INHERITABLETHREADLOCAL );
+      return;
+    }
+
     cleanupUserAndRoles( testingTenant );
     cleanupUserAndRoles( systemTenant );
 

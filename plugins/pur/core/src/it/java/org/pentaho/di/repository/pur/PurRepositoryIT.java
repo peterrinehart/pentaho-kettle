@@ -36,6 +36,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -137,6 +139,7 @@ import org.xml.sax.ext.DefaultHandler2;
 public class PurRepositoryIT extends RepositoryTestBase implements ApplicationContextAware, java.io.Serializable {
 
   static final long serialVersionUID = 2064159405078106703L; /* EESOURCE: UPDATE SERIALVERUID */
+  private static final Logger LOG = LoggerFactory.getLogger( PurRepositoryIT.class );
 
   private IUnifiedRepository repo;
 
@@ -174,6 +177,7 @@ public class PurRepositoryIT extends RepositoryTestBase implements ApplicationCo
   private static IAuthorizationPolicy authorizationPolicy;
 
   private TestContextManager testContextManager;
+  private boolean setUpCompleted;
 
   public PurRepositoryIT( Boolean lazyRepo ) {
     super( lazyRepo );
@@ -199,6 +203,7 @@ public class PurRepositoryIT extends RepositoryTestBase implements ApplicationCo
 
   @Before
   public void setUp() throws Exception {
+    setUpCompleted = false;
     this.testContextManager = new TestContextManager( getClass() );
     this.testContextManager.prepareTestInstance( this );
 
@@ -276,6 +281,7 @@ public class PurRepositoryIT extends RepositoryTestBase implements ApplicationCo
       buf.append( "\n" ).append( file );
     }
     assertTrue( "files not deleted: " + buf, files.isEmpty() );
+    setUpCompleted = true;
   }
 
   private void setAclManagement() {
@@ -341,6 +347,11 @@ public class PurRepositoryIT extends RepositoryTestBase implements ApplicationCo
    * @tenantAdmin true to add the tenant admin authority to the user's roles
    */
   protected void login( final String username, final ITenant tenant, String[] roles ) {
+    if ( tenant == null || tenant.getId() == null ) {
+      LOG.warn( "Skipping login for user '{}' because tenant is null or missing id. roles={}", username,
+          Arrays.toString( roles ) );
+      return;
+    }
     StandaloneSession pentahoSession = new StandaloneSession( username );
     pentahoSession.setAuthenticated( tenant.getId(), username );
     PentahoSessionHolder.setSession( pentahoSession );
@@ -414,6 +425,16 @@ public class PurRepositoryIT extends RepositoryTestBase implements ApplicationCo
 
   @After
   public void tearDown() throws Exception {
+    if ( !setUpCompleted ) {
+      LOG.warn( "Skipping most teardown for {} because setup did not complete. "
+          + "Look for the first setup exception in the test report.", getClass().getSimpleName() );
+      if ( mp != null ) {
+        mp.stop();
+        mp = null;
+      }
+      return;
+    }
+
     // null out fields to get back memory
     authorizationPolicy = null;
     login( sysAdminUserName, systemTenant, new String[] { singleTenantAdminRoleName, tenantAuthenticatedRoleName } );
