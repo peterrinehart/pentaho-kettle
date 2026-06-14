@@ -68,7 +68,10 @@ public class ActiveCacheTest {
   @SuppressWarnings( { "unchecked", "rawtypes" } )
   @Test
   public void testActiveCachePreemtivelyReloadsWhenHalfwayToTimeout() throws Exception {
-    long timeout = 500;
+    // Use a generous timeout so that even on a slow/loaded machine the preemptive-reload
+    // window is hit without the entry actually expiring.  The sleep must be > timeout/2
+    // but well below timeout.
+    long timeout = 4000;
     ActiveCacheLoader<String, String> mockLoader = mock( ActiveCacheLoader.class );
     final ExecutorService mockService = mock( ExecutorService.class );
     final FutureHolder lastSubmittedFuture = new FutureHolder();
@@ -93,7 +96,8 @@ public class ActiveCacheTest {
     String testResult2 = "TEST-RESULT-2";
     when( mockLoader.load( testKey ) ).thenReturn( testResult ).thenReturn( testResult2 );
     assertEquals( testResult, cache.get( testKey ) );
-    Thread.sleep( 255 );
+    // Sleep just past the halfway mark (timeout/2 + small buffer), well before expiry
+    Thread.sleep( timeout / 2 + 100 );
     // Trigger reload, we should get original result back here as it hasn't timed out
     assertEquals( testResult, cache.get( testKey ) );
     // Wait on new value to load

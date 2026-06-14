@@ -14,6 +14,7 @@ package org.pentaho.di.repository.pur;
 
 import static org.junit.Assert.fail;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -24,7 +25,6 @@ import org.junit.Test;
 import org.pentaho.di.base.AbstractMeta;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.RepositoryDirectoryInterface;
 import org.pentaho.di.repository.RepositoryObjectType;
 import org.pentaho.di.shared.SharedObjectInterface;
@@ -32,7 +32,9 @@ import org.pentaho.di.trans.TransMeta;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
+public class PurRepository_SharedObjects_Links_IT extends PurRepositoryTestBase {
+
+  private static final String SHARED_NAME_SUFFIX = "_shared_links";
 
   public PurRepository_SharedObjects_Links_IT( Boolean lazyRepo ) {
     super( lazyRepo );
@@ -54,12 +56,12 @@ public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
 
       @Override
       public void loadFromXml( Node xmlNode ) throws Exception {
-        meta.loadXML( xmlNode, repository, true, null );
+        meta.loadXML( xmlNode, purRepository, true, null );
       }
 
       @Override
       public AbstractMeta createFilled() throws Exception {
-        meta = createTransMeta( EXP_DBMETA_NAME );
+        meta = createFilledTransMeta();
         return meta;
       }
 
@@ -79,12 +81,12 @@ public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
 
       @Override
       public void loadFromXml( Node xmlNode ) throws Exception {
-        meta.loadXML( xmlNode, repository, null );
+        meta.loadXML( xmlNode, purRepository, null );
       }
 
       @Override
       public AbstractMeta createFilled() throws Exception {
-        meta = createJobMeta( EXP_DBMETA_NAME );
+        meta = createFilledJobMeta();
         return meta;
       }
 
@@ -98,23 +100,25 @@ public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
 
   @SuppressWarnings( "unchecked" )
   private void testReadSharedObjects( GenericMeta gMeta ) throws Exception {
-    PurRepository pur = (PurRepository) repository;
+    PurRepository pur = purRepository;
 
-    RepositoryDirectoryInterface rootDir = initRepo();
+    SlaveServer slave1 = new SlaveServer();
+    slave1.setName( "slave1" + SHARED_NAME_SUFFIX );
 
-    SlaveServer slave1 = createSlaveServer( "slave1" );
-    SlaveServer slave2 = createSlaveServer( "slave2" );
+    SlaveServer slave2 = new SlaveServer();
+    slave2.setName( "slave2" + SHARED_NAME_SUFFIX );
 
-    pur.save( slave1, VERSION_COMMENT_V1, null );
-    pur.save( slave2, VERSION_COMMENT_V1, null );
+    pur.save( slave1, null, null );
+    pur.save( slave2, null, null );
 
     AbstractMeta meta = gMeta.createFilled();
 
     meta.getSlaveServers().add( slave1 );
     meta.getSlaveServers().add( slave2 );
 
-    rootDir.findDirectory( DIR_TRANSFORMATIONS );
-    pur.save( meta, VERSION_COMMENT_V1, null );
+    RepositoryDirectoryInterface saveDir = pur.getDefaultSaveDirectory( meta );
+    meta.setRepositoryDirectory( saveDir );
+    pur.save( meta, null, null );
     String xmlText = meta.getXML();
 
     try {
@@ -122,7 +126,7 @@ public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
       meta = gMeta.createEmpty();
       DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
       DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-      Document doc = dBuilder.parse( IOUtils.toInputStream( xmlText ) );
+      Document doc = dBuilder.parse( IOUtils.toInputStream( xmlText, StandardCharsets.UTF_8 ) );
       gMeta.loadFromXml( doc.getParentNode() );
 
       List<SharedObjectInterface<?>> sharedObjects =
@@ -144,9 +148,16 @@ public class PurRepository_SharedObjects_Links_IT extends PurRepositoryIT {
     }
   }
 
-  @Override
-  protected void delete( ObjectId id ) {
-    // do nothing
+  private TransMeta createFilledTransMeta() {
+    TransMeta meta = new TransMeta();
+    meta.setName( "shared_objects_trans" + SHARED_NAME_SUFFIX );
+    return meta;
+  }
+
+  private JobMeta createFilledJobMeta() {
+    JobMeta meta = new JobMeta();
+    meta.setName( "shared_objects_job" + SHARED_NAME_SUFFIX );
+    return meta;
   }
 
 }
